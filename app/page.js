@@ -9,12 +9,12 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:3000/api/message", { 
+    const res = await fetch("/api/message", { 
       method: "POST",
       body: JSON.stringify(input)
     });
-    // const text = res.json();
-    // console.log(text);
+    const text = res.json();
+    console.log(text);
     setIput("");
   };
 
