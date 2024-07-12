@@ -13,7 +13,7 @@ export default function Home() {
       method: "POST",
       body: JSON.stringify(input)
     });
-    const text = res.json();
+    const text = await res.json();
     console.log(text);
     setIput("");
   };
