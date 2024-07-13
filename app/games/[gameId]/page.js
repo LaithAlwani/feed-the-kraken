@@ -52,8 +52,8 @@ export default function GamePage({ searchParams }) {
     <>
       <h2>Hello {username}</h2>
       <ul>
-        {players.map((player) => (
-          <li>{player}</li>
+        {players.map((player, i) => (
+          <li key={i}>{player}</li>
         ))}
       </ul>
       <form onSubmit={handleSubmit}>
