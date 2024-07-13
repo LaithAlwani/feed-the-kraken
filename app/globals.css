@@ -100,8 +100,59 @@ a {
   text-decoration: none;
 }
 
+input {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid;
+  margin-bottom: 1rem;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  background: url("https://funtails.de/wp-content/uploads/2022/09/feed-the-kraken-mobile-background-1.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 50svh;
+}
+.hero img{
+  position: absolute;
+  width: 50%;
+  top: 1rem;
+  left: 1rem;
+}
+
+.btn{
+  border-radius: 0.5rem;
+  border: 1px solid;
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.25s;
+  background-color: transparent;
+}
+
+.btn-alt{
+  background-color: royalblue;
+  color: white;
+}
+
+.btn-delete{
+  background-color: red;
+  color: white;
+}
+
+.btn:hover{
+ background-color: red;
+ color: white;
 }

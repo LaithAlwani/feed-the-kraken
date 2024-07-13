@@ -1,49 +1,29 @@
 "use client";
-import styles from "./page.module.css";
-import { useEffect, useState } from "react";
-import { pusherClient } from "@/lib/pusher";
+import Link from "next/link";
+import {  useState } from "react";
+
 
 export default function Home() {
-  const [input, setIput] = useState();
-  const [incomingMessages, setIncomingMessages] = useState([]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const res = await fetch("/api/message", { 
-      method: "POST",
-      body: JSON.stringify(input)
-    });
-    const text = await res.json();
-    console.log(text);
-    setIput("");
-  };
-
-  useEffect(() => {
-    pusherClient.subscribe("124");
-
-    pusherClient.bind("incoming-message", (input) => {
-      setIncomingMessages((prev) => [...prev, input]);
-    });
-
-    return () => {
-      pusherClient.unsubscribe("124");
-    };
-  }, []);
+  const [username, setUsername] = useState();
 
   return (
-    <main className={styles.main}>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="message"
-          value={input}
-          onChange={(e) => setIput(e.target.value)}
-        />
-        <button>send</button>
-        {incomingMessages.map((message,i) => (
-          <p key={i}>{message}</p>
-        ))}
-      </form>
-    </main>
+    <>
+      <div className="hero">
+        <Link href="/">
+          <img src="https://funtails.de/wp-content/uploads/2020/01/ftk_logo_center.png" alt="" />
+        </Link>
+        {/* <img src="	https://funtails.de/wp-content/uploads/2022/09/feed-the-kraken-mobile-background-1.jpg" alt="" /> */}
+      </div>
+      <div>
+        <h3>A Companion App</h3>
+        {/* <Link href="/games/create" className="btn">
+          Create Room
+        </Link> */}
+        <input type="text" placeholder="username" onChange={(e)=>setUsername(e.target.value)} />
+        <Link href={{pathname:"/games/1", query:{username}}} className="btn btn-alt">
+          Join
+        </Link>
+      </div>
+    </>
   );
 }
