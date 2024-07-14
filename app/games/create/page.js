@@ -1,11 +1,14 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {useUser} from "@clerk/nextjs"
 import toast from "react-hot-toast";
 
 export default function CreateGamePage() {
+  const { isLoaded, user } = useUser();
   const router = useRouter();
   const [roomName, setRoomName] = useState("");
+  
 
   const createGameRoom = async (e) => {
     e.preventDefault();
@@ -14,7 +17,7 @@ export default function CreateGamePage() {
       headers: {
         "Content-type": "application/json",
       },
-      body: JSON.stringify(roomName),
+      body: JSON.stringify({roomName, userId:user.id}),
     });
     if (res.ok) {
       const data = await res.json();
@@ -22,7 +25,7 @@ export default function CreateGamePage() {
       router.push(`/games/${data.gameRoom._id}`);
     }
   };
-  
+
   return (
     <>
       <form onSubmit={createGameRoom}>

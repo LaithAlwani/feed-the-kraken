@@ -1,20 +1,21 @@
 import { Schema, model, models } from "mongoose";
 
-
 const gameRoomSchema = new Schema(
   {
     name: {
       type: String,
       required: true,
     },
-    
+
     players: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Player",
+        type: String,
       },
     ],
-    
+    gameAdmin: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );
