@@ -47,7 +47,7 @@ export default function GamePage({ params }) {
     <>
       <ul>
         {players.map((player) => (
-          <li key={player.id}>{player.username}</li>
+          <li key={player.id}> <img src={player.avatar} alt="" className="avatar" />{player.username}</li>
         ))}
       </ul>
     </>
