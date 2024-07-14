@@ -1,10 +1,15 @@
-import { pusherServer } from '@/lib/pusher'
+import { pusherServer } from "@/lib/pusher";
 
 export async function POST(req) {
-  const { username, gameId } = await req.json()
-  
+  const { user, roomId } = await req.json();
 
-  await pusherServer.trigger(gameId,'player-joined', username)
-  
-  return  Response.json(({ status:200, success: true }))
+  const player = {
+    username: user.fullName,
+    avatar: user.imageUrl,
+    id: user.id,
+  };
+
+  await pusherServer.trigger(roomId, "player-joined", player);
+
+  return Response.json({ status: 200, success: true });
 }

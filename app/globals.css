@@ -204,6 +204,6 @@ nav .cl-avatarBox {
   width: 100%;
 }
 
-.game-room-list .item{
+.game-room-list .game-room-list-item{
   justify-content: space-between;
 }
