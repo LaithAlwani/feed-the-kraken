@@ -108,7 +108,9 @@ ul{
 li{
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
 }
 input {
   width: 100%;
@@ -189,9 +191,19 @@ nav .cl-avatarBox {
   right: 2rem;
 }
 
+.avatar{
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+}
+
 /*game room*/
 
 .game-room-list{
   max-width: 640px;
   width: 100%;
+}
+
+.game-room-list .item{
+  justify-content: space-between;
 }
