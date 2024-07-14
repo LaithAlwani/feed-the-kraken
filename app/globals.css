@@ -116,6 +116,11 @@ nav{
   align-items: center;
   width: 100%;
 }
+nav .cl-avatarBox {
+  width: 3rem;
+  height: 100%;
+}
+
 
 @media (prefers-color-scheme: dark) {
   html {

@@ -1,9 +1,10 @@
 .main {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  min-height: 100svh;
+  padding-block-start: 2rem;
+  min-height: calc(100svh - 98px) ;
   text-align: center;
 }
 
