@@ -9,7 +9,7 @@ const gameRoomSchema = new Schema(
 
     players: [
       {
-        type: String,
+        type: Object,
       },
     ],
     gameAdmin: {

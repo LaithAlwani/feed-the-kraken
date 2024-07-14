@@ -17,7 +17,7 @@ export default function CreateGamePage() {
       headers: {
         "Content-type": "application/json",
       },
-      body: JSON.stringify({roomName, userId:user.id}),
+      body: JSON.stringify({roomName, user}),
     });
     if (res.ok) {
       const data = await res.json();

@@ -101,6 +101,15 @@ a {
   text-decoration: none;
 }
 
+ul{
+  padding: 0;
+  list-style: none;
+}
+li{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 input {
   width: 100%;
   padding: 1rem;
@@ -165,4 +174,24 @@ nav .cl-avatarBox {
 .btn:hover{
  background-color: red;
  color: white;
+}
+
+.icon{
+  border-radius: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+}
+
+/*game room*/
+
+.game-room-list{
+  max-width: 640px;
+  width: 100%;
 }
