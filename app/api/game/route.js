@@ -14,8 +14,6 @@ export async function GET() {
     return new NextResponse("Error in fetching boardgames " + err, { status: 500 });
   }
   
-  
-
 }
 
 export async function POST(req) {

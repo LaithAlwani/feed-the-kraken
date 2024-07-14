@@ -11,10 +11,15 @@ export default function GamePage({ params }) {
   const { roomId } = params;
 
   const addPlayer = async () => {
-    await fetch("/api/player", {
+    const res = await fetch("/api/player", {
       method: "POST",
       body: JSON.stringify({ user, roomId }),
     });
+    if (res.ok) {
+      const data = await res.json();
+      console.log(data)
+      setPlayers(data.players);
+    }
   };
 
   useEffect(() => {
@@ -41,8 +46,8 @@ export default function GamePage({ params }) {
   return (
     <>
       <ul>
-        {players.map((player, i) => (
-          <li key={i}>{player.username}</li>
+        {players.map((player) => (
+          <li key={player.id}>{player.username}</li>
         ))}
       </ul>
     </>
