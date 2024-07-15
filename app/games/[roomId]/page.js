@@ -6,6 +6,7 @@ import { useUser } from "@clerk/nextjs";
 
 export default function GamePage({ params }) {
   const [input, setInput] = useState();
+  const [gameRoom, setGameRoom] = useState({})
   const [players, setPlayers] = useState([]);
   const { isLoaded, user } = useUser();
   const { roomId } = params;
@@ -17,7 +18,7 @@ export default function GamePage({ params }) {
     });
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
+      setGameRoom(data)
       setPlayers(data.players);
     }
   };
@@ -28,14 +29,12 @@ export default function GamePage({ params }) {
     pusherClient.subscribe(roomId);
 
     pusherClient.bind("player-joined", (player) => {
-      if (player) {
-        setPlayers((prev) => [...prev, player]);
-        if (isLoaded) {
-          if (user.id === player.id) {
-            toast.success(`joined Room`);
-          } else {
-            toast.success(`${player.username} has joined`);
-          }
+      setPlayers((prev) => [...prev, player]);
+      if (isLoaded) {
+        if (user.id === player.id) {
+          toast.success(`joined Room`);
+        } else {
+          toast.success(`${player.username} has joined`);
         }
       }
     });
@@ -47,6 +46,7 @@ export default function GamePage({ params }) {
 
   return (
     <>
+      <h2>{gameRoom.name}</h2>
       <ul>
         {players.map((player) => (
           <li key={player.id}>

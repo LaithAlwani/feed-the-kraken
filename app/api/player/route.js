@@ -10,19 +10,19 @@ export async function POST(req) {
     await connectToDB();
 
     const gameRoom = await GameRoom.findOne({ roomId });
-    const player = gameRoom.players.find((player) => player.id === user.id);
-
-    if (player) {
-      await pusherServer.trigger(roomId, "player-joined", null);
-      return new NextResponse(JSON.stringify(gameRoom), { status: 201 });
-    } else {
+    const player = gameRoom.players.find((player) => player.id === user.id) || {};
+    
+    if (Object.keys(player) === 0) {
       (player.username = user.fullName),
         (player.avatar = user.imageUrl),
         (player.id = user.id),
         gameRoom.players.push(player);
+      console.log(player);
       await gameRoom.save();
       await pusherServer.trigger(roomId, "player-joined", player);
 
+      return new NextResponse(JSON.stringify(gameRoom), { status: 201 });
+    } else {
       return new NextResponse(JSON.stringify(gameRoom), { status: 201 });
     }
   } catch (err) {

@@ -23,7 +23,7 @@ export async function POST(req) {
     await connectToDB();
     const players = []
     players.push({
-      name: user.fullName,
+      username: user.fullName,
       avatar: user.imageUrl,
       id:user.id
     })
