@@ -203,3 +203,36 @@ nav .cl-avatarBox {
 .game-room-list .game-room-list-item {
   justify-content: space-between;
 }
+
+.custom-toast {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  color: #363636;
+  line-height: 1.3;
+  will-change: transform;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1), 0 3px 3px rgba(0, 0, 0, 0.05);
+  max-width: 350px;
+  pointer-events: auto;
+  padding-inline: 1rem;
+  border-radius: 0.5rem;
+  animation: 0.35s cubic-bezier(0.5, 1.5, 1, 1) 0s 1 normal forwards running custom-animation;
+}
+
+.custom-toast .exit {
+  animation: 0.35s cubic-bezier(0.06, 0.71, 0.55, 1) 0s 1 normal forwards running
+    custom-exit-animation;
+}
+
+@keyframes custom-animation {
+  0% {
+    transform: translate3d(0, -200%, 0) scale(0.6);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
