@@ -23,15 +23,6 @@ export default function GamePage({ params }) {
     }
   }
 
-  // const addPlayer = async () => {
-  //   const res = await fetch("/api/player/add", {
-  //     method: "POST",
-  //     body: JSON.stringify({ user, roomId }),
-  //   });
-  //   if (res.ok) {
-  //     updateRoom()
-  //   }
-  // };
 
   const leaveRoom = async() => {
     const res = await fetch("/api/player/remove", {
@@ -39,7 +30,7 @@ export default function GamePage({ params }) {
       body: JSON.stringify({ user, roomId }),
     });
     if (res.ok) {
-      
+      router.push("/games");
     }
   }
 
