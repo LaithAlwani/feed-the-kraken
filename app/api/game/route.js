@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDB from "@/utils/database";
 import GameRoom from "@/models/gameRoom";
+import { pusherServer } from "@/lib/pusher";
 
 
 export async function GET() {
@@ -26,7 +27,9 @@ export async function POST(req) {
       avatar: user.imageUrl,
       id:user.id
     })
-    const gameRoom = await GameRoom.create({ name: roomName, players, gameAdmin:user.id });
+    const gameRoom = await GameRoom.create({ name: roomName, players, gameAdmin: user.id });
+      await pusherServer.trigger("lobby", "room-created", gameRoom);
+        
     return NextResponse.json({ message: `${roomName} has been created`, gameRoom }, { status: 201 });
   } catch (err) {
     return  NextResponse.json({message:"Error in creating game room " + err}, { status: 500 });

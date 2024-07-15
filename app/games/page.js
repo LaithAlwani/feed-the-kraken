@@ -1,4 +1,5 @@
 "use client";
+import { pusherClient } from "@/lib/pusher";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,13 +28,22 @@ export default function GamesPage() {
       body: JSON.stringify({ user, roomId }),
     });
     if (res.ok) {
-      router.push(`/games/${roomId}`)
+      router.push(`/games/${roomId}`);
     }
   };
 
-
   useEffect(() => {
     getGameRooms();
+
+    pusherClient.subscribe("lobby");
+
+    
+    pusherClient.bind("room-created", (gameRoom) => {
+      setGameRooms((prev) => [...prev, gameRoom]);
+    });
+    return () => {
+      pusherClient.unsubscribe("lobby");
+    };
   }, []);
   return (
     <>
@@ -47,7 +57,7 @@ export default function GamesPage() {
             <h3>{room.name}</h3>{" "}
             <p>
               ({room.players.length}/11){" "}
-              <button onClick={()=>joinRoom(room._id)} className="btn">
+              <button onClick={() => joinRoom(room._id)} className="btn">
                 Join
               </button>
             </p>
