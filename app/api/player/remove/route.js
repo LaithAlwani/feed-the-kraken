@@ -11,19 +11,17 @@ export async function POST(req) {
 
     const gameRoom = await GameRoom.findOne({ roomId });
     const player = gameRoom.players.find((player) => player.id === user.id) || {};
-    
-    if (Object.keys(player) === 0) {
-      (player.username = user.fullName),
-        (player.avatar = user.imageUrl),
-        (player.id = user.id),
-        gameRoom.players.push(player);
-      console.log(player);
-      await gameRoom.save();
-      await pusherServer.trigger(roomId, "player-joined", player);
 
+    if (Object.keys(player).length != 0) {
+      const index = gameRoom.players.indexOf(player);
+      console.log(index)
+      await gameRoom.players.splice(index, 1);
+
+      await gameRoom.save();
+      await pusherServer.trigger(roomId, "player-left", player);
       return new NextResponse(JSON.stringify(gameRoom), { status: 201 });
     } else {
-      return new NextResponse(JSON.stringify(gameRoom), { status: 201 });
+      return new NextResponse.json({ message: "no player found" }, { status: 201 });
     }
   } catch (err) {
     return NextResponse.json({ message: "Error in creating game room " + err }, { status: 500 });

@@ -1,14 +1,13 @@
+import { NextResponse } from "next/server";
 import connectToDB from "@/utils/database";
 import GameRoom from "@/models/gameRoom";
-import { NextResponse } from "next/server";
-import gameRoom from "@/models/gameRoom";
 
 
 export async function GET() {
   
   try {
     await connectToDB();
-    const gameRooms = await gameRoom.find();
+    const gameRooms = await GameRoom.find();
     return new NextResponse(JSON.stringify(gameRooms), { status: 200 });
   } catch (err) {
     return new NextResponse("Error in fetching boardgames " + err, { status: 500 });

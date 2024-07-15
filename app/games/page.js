@@ -1,9 +1,13 @@
 "use client";
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 
 export default function GamesPage() {
+  const { user } = useUser();
+  const router = useRouter();
   const [gameRooms, setGameRooms] = useState([]);
 
   const getGameRooms = async () => {
@@ -14,6 +18,16 @@ export default function GamesPage() {
       data.forEach((gameRoom) => {
         setGameRooms((prev) => [...prev, gameRoom]);
       });
+    }
+  };
+
+  const joinRoom = async (roomId) => {
+    const res = await fetch("/api/player/add", {
+      method: "POST",
+      body: JSON.stringify({ user, roomId }),
+    });
+    if (res.ok) {
+      router.push(`/games/${roomId}`)
     }
   };
 
@@ -33,9 +47,9 @@ export default function GamesPage() {
             <h3>{room.name}</h3>{" "}
             <p>
               ({room.players.length}/11){" "}
-              <Link href={`/games/${room._id}`} className="btn">
+              <button onClick={()=>joinRoom(room._id)} className="btn">
                 Join
-              </Link>
+              </button>
             </p>
           </li>
         ))}

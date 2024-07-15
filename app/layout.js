@@ -1,16 +1,9 @@
-import { Skranji } from "next/font/google";
 import "./globals.css";
 import styles from "./page.module.css";
 import { Toaster } from "react-hot-toast";
 import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-
-const skranji = Skranji({
-  weight: '400',
-  weight: '700',
-  subsets: ["latin"]
-});
 
 export const metadata = {
   title: "Create Next App",
@@ -21,7 +14,7 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={skranji.className}>
+        <body>
           <Toaster />
           <Navbar />
           <main className={styles.main}>{children}</main>
