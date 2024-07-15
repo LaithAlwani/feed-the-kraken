@@ -17,7 +17,7 @@ export default function GamePage({ params }) {
     });
     if (res.ok) {
       const data = await res.json();
-      console.log(data)
+      console.log(data);
       setPlayers(data.players);
     }
   };
@@ -28,12 +28,14 @@ export default function GamePage({ params }) {
     pusherClient.subscribe(roomId);
 
     pusherClient.bind("player-joined", (player) => {
-      setPlayers((prev) => [...prev, player]);
-      if (isLoaded) {
-        if (user.id === player.id) {
-          toast.success(`joined Room`);
-        } else {
-          toast.success(`${player.username} has joined`);
+      if (player) {
+        setPlayers((prev) => [...prev, player]);
+        if (isLoaded) {
+          if (user.id === player.id) {
+            toast.success(`joined Room`);
+          } else {
+            toast.success(`${player.username} has joined`);
+          }
         }
       }
     });
@@ -47,7 +49,11 @@ export default function GamePage({ params }) {
     <>
       <ul>
         {players.map((player) => (
-          <li key={player.id}> <img src={player.avatar} alt="" className="avatar" />{player.username}</li>
+          <li key={player.id}>
+            {" "}
+            <img src={player.avatar} alt="" className="avatar" />
+            {player.username}
+          </li>
         ))}
       </ul>
     </>
