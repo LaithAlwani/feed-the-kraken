@@ -33,6 +33,7 @@ const Navbar = () => {
           alt="logo"
           width={150}
           height={60}
+          className={styles.logo}
         />
       </Link>
       <div className="navlinks">
