@@ -155,9 +155,7 @@ nav .cl-avatarBox {
 }
 
 .btn {
-  border-radius: 0.5rem;
-  border: 1px solid;
-
+  border: none;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   font-weight: 500;
@@ -190,12 +188,6 @@ nav .cl-avatarBox {
   color: #333;
 }
 
-.choose-event {
-  position: fixed;
-  bottom: 5rem;
-  right: 0rem;
-  width: 200px;
-}
 
 .btn:hover {
   background-color: red;
@@ -243,7 +235,7 @@ nav .cl-avatarBox {
   left: 0;
   width: 100vw;
   height: 100svh;
-  background-color: #ffffff;
+  background-color: rgb(var(--background-start-rgb));
 }
 
 .custom-toast {

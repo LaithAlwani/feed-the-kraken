@@ -55,7 +55,7 @@ export default function GamePage({ params }) {
     });
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
+      
     }
   };
 
@@ -71,7 +71,7 @@ export default function GamePage({ params }) {
     });
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
+      
     }
   };
 
@@ -149,14 +149,14 @@ export default function GamePage({ params }) {
             Start Event
           </button>
           {toggleEventMenu && (
-            <div className="choose-event">
+            <div>
               <select onChange={(e) => setEvent(e.target.value)}>
                 <option value="">Choose Event</option>
                 <option value="recruit">Recruit</option>
                 <option value="give 3 guns">Give 3 guns</option>
                 <option value="check navigation team">Check Navigation Team</option>
               </select>
-              <button className="btn" onClick={chooseEvent}>
+              <button className="btn btn-event" onClick={chooseEvent}>
                 Choose Event
               </button>
             </div>

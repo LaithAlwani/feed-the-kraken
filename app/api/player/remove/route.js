@@ -14,7 +14,7 @@ export async function POST(req) {
 
     if (Object.keys(player).length != 0) {
       const index = gameRoom.players.indexOf(player);
-      console.log(index);
+
       await gameRoom.players.splice(index, 1);
       await gameRoom.save();
       await pusherServer.trigger(roomId, "player-left", player);
@@ -23,7 +23,6 @@ export async function POST(req) {
       return NextResponse.json({ message: "no player found" }, { status: 201 });
     }
   } catch (err) {
-    console.log(err);
     return NextResponse.json({ message: "Error while leaving room " + err }, { status: 500 });
   }
 }

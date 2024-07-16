@@ -20,7 +20,7 @@ export default function GamesPage() {
         const data = await res.json();
         setGameRooms([]);
         data.forEach((gameRoom) => {
-          console.log(gameRoom);
+  
           setGameRooms((prev) => [...prev, gameRoom]);
         });
       }
@@ -32,7 +32,6 @@ export default function GamesPage() {
   };
 
   const joinRoom = async (roomId) => {
-    console.log(roomId);
     const res = await fetch("/api/player/add", {
       method: "POST",
       body: JSON.stringify({ user, roomId }),
