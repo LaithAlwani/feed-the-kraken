@@ -124,7 +124,7 @@ export default function GamePage({ params }) {
 
     pusherClient.bind("recruit", (playerId) => {
       if (user.id === playerId) {
-        toast.success("you have been recruited", { id: playerId });
+        toast.success("you have been recruited", { duration:5000, id: playerId });
         navigator.vibrate([450, 100, 450]);
       } else {
         navigator.vibrate(1000);
@@ -169,7 +169,7 @@ export default function GamePage({ params }) {
           <ul>
             {players &&
               players.length > 0 &&
-              players.map((player) => (
+              players.filter(player=>user.id !== player.id).map((player) => (
                 <li key={player.id} onClick={() => choosePlayerToRecruit(player.id)}>
                   <img src={player.avatar} alt="" className="avatar" />
                   {player.username}
