@@ -4,6 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 
 export default function GamesPage() {
@@ -17,12 +18,14 @@ export default function GamesPage() {
       const data = await res.json();
       setGameRooms([]);
       data.forEach((gameRoom) => {
+        console.log(gameRoom);
         setGameRooms((prev) => [...prev, gameRoom]);
       });
     }
   };
 
   const joinRoom = async (roomId) => {
+    console.log(roomId);
     const res = await fetch("/api/player/add", {
       method: "POST",
       body: JSON.stringify({ user, roomId }),
@@ -37,10 +40,13 @@ export default function GamesPage() {
 
     pusherClient.subscribe("lobby");
 
-    
     pusherClient.bind("room-created", (gameRoom) => {
       setGameRooms((prev) => [...prev, gameRoom]);
     });
+    pusherClient.bind("room-deleted", (gameRoom) => {
+      getGameRooms();
+    });
+    
     return () => {
       pusherClient.unsubscribe("lobby");
     };

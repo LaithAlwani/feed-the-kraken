@@ -17,7 +17,6 @@ export default function GamePage({ params }) {
     const res = await fetch(`/api/game/${roomId}`);
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
       setGameRoom(data[0]);
       setPlayers(data[0].players);
     }
@@ -29,19 +28,30 @@ export default function GamePage({ params }) {
       body: JSON.stringify({ user, roomId }),
     });
     if (res.ok) {
+      const data = await res.json();
       router.push("/games");
     }
+  };
+
+  const deleteRoom = async () => {
+    const res = await fetch("/api/game/delete", {
+      method: "POST",
+      body: JSON.stringify({ roomId }),
+    });
+    
   };
 
   const customToast = (player, status) => {
     toast.custom(
       <div className="custom-toast">
         <img src={player.avatar} alt="" className="avatar" />
-        <p>{player.username} has {status}</p>
+        <p>
+          {player.username} has {status}
+        </p>
       </div>,
-      { duration:2000, id: player.id }
+      { duration: 2000, id: player.id }
     );
-  }
+  };
 
   useEffect(() => {
     user && updateRoom();
@@ -54,7 +64,7 @@ export default function GamePage({ params }) {
         if (user.id === player.id) {
           toast.success(`joined Room`, { id: player.id });
         } else {
-          customToast(player, "joined"); 
+          customToast(player, "joined");
         }
       }
     });
@@ -62,11 +72,16 @@ export default function GamePage({ params }) {
       updateRoom();
       if (isLoaded) {
         if (user.id === player.id) {
-          toast.success(`You left the Room`, { duration:5000,id: player.id });
+          toast.success(`You left the Room`, { duration: 5000, id: player.id });
         } else {
-          customToast(player,"left");
+          customToast(player, "left");
         }
       }
+    });
+
+    pusherClient.bind("room-deleted", (gameRoom) => {
+      toast.success("room has been delete", {id: gameRoom._id});
+      router.push("/games");
     });
 
     return () => {
@@ -80,6 +95,11 @@ export default function GamePage({ params }) {
       <button className="btn btn-delete" onClick={leaveRoom}>
         Leave
       </button>
+      {user && user.id === gameRoom.gameAdmin && (
+        <button className="btn btn-delete" onClick={deleteRoom}>
+          Delete Room
+        </button>
+      )}
       <ul>
         {players &&
           players.length > 0 &&

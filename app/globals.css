@@ -182,8 +182,8 @@ nav .cl-avatarBox {
   align-items: center;
   padding: 0;
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: 1rem;
+  right: 1rem;
 }
 
 .avatar {
