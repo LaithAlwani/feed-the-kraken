@@ -1,6 +1,6 @@
 import "./globals.css";
 import styles from "./page.module.css";
-import { Toaster } from "react-hot-toast";
+import toast, { ToastBar, Toaster } from "react-hot-toast";
 import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,6 +16,7 @@ export default function RootLayout({ children }) {
       <html lang="en">
         <body>
           <Toaster />
+            
           <Navbar />
           <main className={styles.main}>{children}</main>
         </body>
@@ -42,3 +43,4 @@ const Navbar = () => {
     </nav>
   );
 };
+
