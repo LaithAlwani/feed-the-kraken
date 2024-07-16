@@ -67,7 +67,7 @@ export default function GamePage({ params }) {
   const choosePlayerToRecruit = async (playerId) => {
     const res = await fetch("/api/game/event/recruit", {
       method: "POST",
-      body: JSON.stringify({roomId, playerId}),
+      body: JSON.stringify({ roomId, playerId }),
     });
     if (res.ok) {
       const data = await res.json();
@@ -121,12 +121,15 @@ export default function GamePage({ params }) {
     pusherClient.bind("incoming-event", (value) => {
       openEventModle(value);
     });
-    
+
     pusherClient.bind("recruit", (playerId) => {
       if (user.id === playerId) {
-        toast.success("you have been recruited", { id: playerId })
-        navigator.vibrate(2000)
+        toast.success("you have been recruited", { id: playerId });
+        navigator.vibrate(500, 200, 500);
       }
+      setToggleEventModle(false);
+      setToggleEventMenu(false);
+      navigator.vibrate(1000);
     });
 
     return () => {
@@ -161,7 +164,6 @@ export default function GamePage({ params }) {
       )}
       {toggleEventModle && (
         <div className="modle">
-          <span onClick={() => setToggleEventModle(false)}>X</span>
           <h3>{eventValue} has start</h3>
           <ul>
             {players &&
