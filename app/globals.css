@@ -76,7 +76,8 @@
   font-family: "Skranji", system-ui;
   font-weight: 400;
   font-style: normal;
-  
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
 }
 
 html,
@@ -92,7 +93,7 @@ body {
   background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb)))
     rgb(var(--background-start-rgb));
 }
-section{
+section {
   max-width: 40rem;
 }
 a {
@@ -111,7 +112,7 @@ li {
   justify-content: flex-start;
   margin-bottom: 0.5rem;
 }
-input, select {
+input {
   width: 100%;
   padding: 1rem;
   border-radius: 0.25rem;
@@ -156,7 +157,7 @@ nav .cl-avatarBox {
 .btn {
   border-radius: 0.5rem;
   border: 1px solid;
-  
+
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   font-weight: 500;
@@ -173,17 +174,27 @@ nav .cl-avatarBox {
   color: red;
 }
 
-.btn-leave{
+.btn-leave {
   position: fixed;
   top: 6rem;
   left: 1rem;
-  transform:scaleX(-1);
+  transform: scaleX(-1);
   color: red;
 }
 
-.btn-event{
+.btn-event {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
   background-color: yellow;
   color: #333;
+}
+
+.choose-event {
+  position: fixed;
+  bottom: 5rem;
+  right: 0rem;
+  width: 200px;
 }
 
 .btn:hover {
@@ -222,7 +233,7 @@ nav .cl-avatarBox {
   justify-content: space-between;
 }
 
-.modle{
+.modle {
   position: fixed;
   display: flex;
   justify-content: center;
@@ -266,4 +277,3 @@ nav .cl-avatarBox {
     opacity: 1;
   }
 }
-

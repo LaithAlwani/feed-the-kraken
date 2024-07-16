@@ -149,23 +149,24 @@ export default function GamePage({ params }) {
             Start Event
           </button>
           {toggleEventMenu && (
-            <>
+            <div className="choose-event">
               <select onChange={(e) => setEvent(e.target.value)}>
                 <option value="">Choose Event</option>
                 <option value="recruit">Recruit</option>
                 <option value="give 3 guns">Give 3 guns</option>
                 <option value="check navigation team">Check Navigation Team</option>
               </select>
-              <button className="btn btn-event" onClick={chooseEvent}>
+              <button className="btn" onClick={chooseEvent}>
                 Choose Event
               </button>
-            </>
+            </div>
           )}
         </>
       )}
       {toggleEventModle && (
         <div className="modle">
-          <h3>{eventValue} has start</h3>
+          <h3>{eventValue} event has start</h3>
+          <p>Cult Leader pick a player to join your team</p>
           <ul>
             {players &&
               players.length > 0 &&
@@ -176,6 +177,7 @@ export default function GamePage({ params }) {
                 </li>
               ))}
           </ul>
+          <p>Your device will vibrate twice if you are choosen</p>
         </div>
       )}
       <ul>
