@@ -125,11 +125,12 @@ export default function GamePage({ params }) {
     pusherClient.bind("recruit", (playerId) => {
       if (user.id === playerId) {
         toast.success("you have been recruited", { id: playerId });
-        navigator.vibrate(500, 200, 500);
+        navigator.vibrate([450, 100, 450]);
+      } else {
+        navigator.vibrate(1000);
       }
       setToggleEventModle(false);
       setToggleEventMenu(false);
-      navigator.vibrate(1000);
     });
 
     return () => {
