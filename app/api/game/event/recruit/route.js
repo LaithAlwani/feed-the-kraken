@@ -1,7 +1,7 @@
 import { pusherServer } from '@/lib/pusher'
 
 export async function POST(req) {
-  const  {playerId, roomId}  = await req.json()
+  const { playerId, roomId } = await req.json()
 
   await pusherServer.trigger(roomId,'recruit', playerId)
   

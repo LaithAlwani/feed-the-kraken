@@ -55,7 +55,6 @@ export default function GamePage({ params }) {
     });
     if (res.ok) {
       const data = await res.json();
-      
     }
   };
 
@@ -71,7 +70,22 @@ export default function GamePage({ params }) {
     });
     if (res.ok) {
       const data = await res.json();
-      
+    }
+  };
+
+  const handleGunDistribution = (e, player) => {
+    player.guns = e.target.value;
+    console.log(player);
+  };
+
+  const distributeGuns = async () => {
+    const res = await fetch("/api/game/event/guns", {
+      method: "POST",
+      body: JSON.stringify({ roomId, players }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      console.log(data);
     }
   };
 
@@ -124,11 +138,30 @@ export default function GamePage({ params }) {
 
     pusherClient.bind("recruit", (playerId) => {
       if (user.id === playerId) {
-        toast.success("you have been recruited", { duration:5000, id: playerId });
-        navigator.vibrate([450, 100, 450]);
+        toast.success("you have been recruited", { duration: 5000, id: playerId });
+        navigator.vibrate([225, 50, 225]);
       } else {
-        navigator.vibrate(1000);
+        navigator.vibrate(500);
       }
+      setToggleEventModle(false);
+      setToggleEventMenu(false);
+    });
+    pusherClient.bind("guns", (players) => {
+      console.log(players);
+      players.forEach((player) => {
+        if (user.id === player.id) {
+          toast.success(`you have been awarded ${player.guns} gun(s)`, {
+            duration: 5000,
+            id: player.id,
+          });
+        } else {
+          toast.success(`${player.username} been awarded ${player.guns} gun(s)`, {
+            duration: 5000,
+            id: player.id,
+          });
+        }
+      });
+      navigator.vibrate(500);
       setToggleEventModle(false);
       setToggleEventMenu(false);
     });
@@ -163,21 +196,51 @@ export default function GamePage({ params }) {
           )}
         </>
       )}
-      {toggleEventModle && (
+      {toggleEventModle && eventValue === "recruit" && (
         <div className="modle">
           <h3>{eventValue} event has start</h3>
           <p>Cult Leader pick a player to join your team</p>
           <ul>
             {players &&
               players.length > 0 &&
-              players.filter(player=>user.id !== player.id).map((player) => (
-                <li key={player.id} onClick={() => choosePlayerToRecruit(player.id)}>
-                  <img src={player.avatar} alt="" className="avatar" />
-                  {player.username}
-                </li>
-              ))}
+              players
+                .filter((player) => user.id !== player.id)
+                .map((player) => (
+                  <li key={player.id} onClick={() => choosePlayerToRecruit(player.id)}>
+                    <img src={player.avatar} alt="" className="avatar" />
+                    {player.username}
+                  </li>
+                ))}
           </ul>
           <p>Your device will vibrate twice if you are choosen</p>
+        </div>
+      )}
+      {toggleEventModle && eventValue === "give 3 guns" && (
+        <div className="modle">
+          <section>
+            <h3>{eventValue} event has start</h3>
+            <p>Cult Leader 3 guns to any player(s)</p>
+            <ul>
+              {players &&
+                players.length > 0 &&
+                players.map((player) => (
+                  <li key={player.id}>
+                    <img src={player.avatar} alt="" className="avatar" />
+                    {player.username}
+                    <input
+                      type="number"
+                      defaultValue={0}
+                      min={0}
+                      max={3}
+                      onChange={(e) => handleGunDistribution(e, player)}
+                    />
+                  </li>
+                ))}
+            </ul>
+            <button className="btn btn-event" onClick={distributeGuns}>
+              Done
+            </button>
+          </section>
         </div>
       )}
       <ul>
