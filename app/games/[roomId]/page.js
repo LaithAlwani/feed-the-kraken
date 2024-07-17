@@ -64,9 +64,10 @@ export default function GamePage({ params }) {
   };
 
   const choosePlayerToRecruit = async (playerId) => {
+    const cultLeader = players.filter(player => player.id === user.id)[0];
     const res = await fetch("/api/game/event/recruit", {
       method: "POST",
-      body: JSON.stringify({ roomId, playerId }),
+      body: JSON.stringify({ roomId, playerId, cultLeader }),
     });
     if (res.ok) {
       const data = await res.json();
@@ -98,6 +99,29 @@ export default function GamePage({ params }) {
         </p>
       </div>,
       { duration: 2000, id: player.id }
+    );
+  };
+
+  const customRecruitToast = (player) => {
+    toast.custom(
+      <div className="custom-toast">
+        <img src={player.avatar} alt="" className="avatar" />
+        <p>
+          {player.username} has recruited you!
+        </p>
+      </div>,
+      { duration: 5000, id: player.id }
+    );
+  }
+  const customGunsToast = (player) => {
+    toast.custom(
+      <div className="custom-toast">
+        <img src={player.avatar} alt="" className="avatar" />
+        <p>
+          {player.username} awarded {player.guns} gun(s)
+        </p>
+      </div>,
+      { duration: 5000, id: player.id }
     );
   };
 
@@ -136,9 +160,10 @@ export default function GamePage({ params }) {
       openEventModle(value);
     });
 
-    pusherClient.bind("recruit", (playerId) => {
+    pusherClient.bind("recruit", (data) => {
+      const { cultLeader, playerId } = data;
       if (user.id === playerId) {
-        toast.success("you have been recruited", { duration: 5000, id: playerId });
+        customRecruitToast(cultLeader)
         navigator.vibrate([225, 50, 225]);
       } else {
         navigator.vibrate(500);
@@ -155,10 +180,7 @@ export default function GamePage({ params }) {
             id: player.id,
           });
         } else {
-          toast.success(`${player.username} been awarded ${player.guns} gun(s)`, {
-            duration: 5000,
-            id: player.id,
-          });
+          customGunsToast(player)
         }
       });
       navigator.vibrate(500);
