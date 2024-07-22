@@ -33,13 +33,12 @@ export default function GamePage({ params }) {
       body: JSON.stringify({ user, roomId }),
     });
     if (res.ok) {
-      const data = await res.json();
       router.push("/games");
     }
   };
 
   const deleteRoom = async () => {
-    const res = await fetch("/api/game/delete", {
+    await fetch("/api/game/delete", {
       method: "POST",
       body: JSON.stringify({ roomId }),
     });
@@ -65,69 +64,55 @@ export default function GamePage({ params }) {
   };
 
   const choosePlayerToRecruit = async (playerId) => {
-    const cultLeader = players.filter(player => player.id === user.id)[0];
-    const res = await fetch("/api/game/event/recruit", {
+    const cultLeader = gameRoom.players.filter((player) => player.id === user.id)[0];
+    await fetch("/api/game/event/recruit", {
       method: "POST",
       body: JSON.stringify({ roomId, playerId, cultLeader }),
     });
-    if (res.ok) {
-      const data = await res.json();
+  };
+  
+  let toatalGuns = 0;
+  const gunTotal = (player, value) => {
+    
+    if (toatalGuns + value > 3) {
+      return toast.error("Only 3 guns can be distributed")
     }
+    if (player.guns + value > 3) {
+      return toast.error("Cannot give more than 3")
+    }
+    if (player.guns + value < 0) {
+      return toast.error("no negative values")
+    }
+    toatalGuns += value;
+    player.guns += value;
+    document.getElementById(player.id).innerHTML = player.guns;
   };
 
   const handleGunDistribution = (e, player) => {
     player.guns = e.target.value;
-    console.log(player);
   };
 
   const distributeGuns = async () => {
-    const res = await fetch("/api/game/event/guns", {
+    await fetch("/api/game/event/guns", {
       method: "POST",
       body: JSON.stringify({ roomId, players }),
     });
-    if (res.ok) {
-      const data = await res.json();
-      console.log(data);
-    }
   };
 
-  const customToast = (player, status) => {
+  const customToast = (player, message, duration) => {
     toast.custom(
       <div className="custom-toast">
         <img src={player.avatar} alt="" className="avatar" />
         <p>
-          {player.username} has {status}
+          {player.username} {message}
         </p>
       </div>,
-      { duration: 2000, id: player.id }
-    );
-  };
-
-  const customRecruitToast = (player) => {
-    toast.custom(
-      <div className="custom-toast">
-        <img src={player.avatar} alt="" className="avatar" />
-        <p>
-          {player.username} has recruited you!
-        </p>
-      </div>,
-      { duration: 5000, id: player.id }
-    );
-  }
-  const customGunsToast = (player) => {
-    toast.custom(
-      <div className="custom-toast">
-        <img src={player.avatar} alt="" className="avatar" />
-        <p>
-          {player.username} awarded {player.guns} gun(s)
-        </p>
-      </div>,
-      { duration: 5000, id: player.id }
+      { duration: duration || 2000, id: player.id }
     );
   };
 
   useEffect(() => {
-    user && updateRoom();
+    updateRoom();
 
     pusherClient.subscribe(roomId);
 
@@ -137,17 +122,17 @@ export default function GamePage({ params }) {
         if (user.id === player.id) {
           toast.success(`joined Room`, { id: player.id });
         } else {
-          customToast(player, "joined");
+          customToast(player, "has joined");
         }
       }
     });
     pusherClient.bind("player-left", (player) => {
       updateRoom();
       if (isLoaded) {
-        if (user.id === player.id) {
-          toast.success(`You left the Room`, { duration: 5000, id: player.id });
+        if (user?.id === player.id) {
+          customToast(player, "you left the Room");
         } else {
-          customToast(player, "left");
+          customToast(player, "has left");
         }
       }
     });
@@ -163,8 +148,8 @@ export default function GamePage({ params }) {
 
     pusherClient.bind("recruit", (data) => {
       const { cultLeader, playerId } = data;
-      if (user.id === playerId) {
-        customRecruitToast(cultLeader)
+      if (user?.id === playerId) {
+        customToast(cultLeader, "has recriuted you!", 1000);
         navigator.vibrate([225, 50, 225]);
       } else {
         navigator.vibrate(500);
@@ -173,15 +158,11 @@ export default function GamePage({ params }) {
       setToggleEventMenu(false);
     });
     pusherClient.bind("guns", (players) => {
-      console.log(players);
       players.forEach((player) => {
         if (user.id === player.id) {
-          toast.success(`you have been awarded ${player.guns} gun(s)`, {
-            duration: 5000,
-            id: player.id,
-          });
+          customToast(player, `you have been awarded ${player.guns} gun(s)`, 10000);
         } else {
-          customGunsToast(player)
+          customToast(player, `has been awarded ${player.guns} gun(s)`, 10000);
         }
       });
       navigator.vibrate(500);
@@ -205,7 +186,7 @@ export default function GamePage({ params }) {
             Start Event
           </button>
           {toggleEventMenu && (
-            <div>
+            <div className="modle">
               <select onChange={(e) => setEvent(e.target.value)}>
                 <option value="">Choose Event</option>
                 <option value="recruit">Recruit</option>
@@ -235,7 +216,6 @@ export default function GamePage({ params }) {
                   </li>
                 ))}
           </ul>
-          <p>Your device will vibrate twice if you are choosen</p>
         </div>
       )}
       {toggleEventModle && eventValue === "give 3 guns" && (
@@ -244,19 +224,14 @@ export default function GamePage({ params }) {
             <h3>{eventValue} event has start</h3>
             <p>Cult Leader 3 guns to any player(s)</p>
             <ul>
-              {players &&
-                players.length > 0 &&
-                players.map((player) => (
+              {gameRoom.players.length > 0 &&
+                gameRoom.players.map((player) => (
                   <li key={player.id}>
                     <img src={player.avatar} alt="" className="avatar" />
                     {player.username}
-                    <input
-                      type="number"
-                      defaultValue={0}
-                      min={0}
-                      max={3}
-                      onChange={(e) => handleGunDistribution(e, player)}
-                    />
+                    <span onClick={() => gunTotal(player, -1)}>-</span>
+                    <span id={player.id}>{player.guns}</span>
+                    <span onClick={() => gunTotal(player, 1)}>+</span>
                   </li>
                 ))}
             </ul>
