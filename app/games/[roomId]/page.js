@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { MdOutlineExitToApp, MdDeleteOutline } from "react-icons/md";
+import PlayersList from "@/components/PlayersList";
 
 export default function GamePage({ params }) {
   const router = useRouter();
@@ -265,16 +266,7 @@ export default function GamePage({ params }) {
           </section>
         </div>
       )}
-      <ul>
-        {players &&
-          players.length > 0 &&
-          players.map((player) => (
-            <li key={player.id}>
-              <img src={player.avatar} alt="" className="avatar" />
-              {player.username}
-            </li>
-          ))}
-      </ul>
+      <PlayersList players={gameRoom.players} />
     </section>
   );
 }
