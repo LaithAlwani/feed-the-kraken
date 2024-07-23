@@ -73,8 +73,8 @@ export default function GamesPage() {
                 <h3>{room.name}</h3>{" "}
                 <p>
                   ({room.players.length}/11){" "}
-                  <button onClick={() => joinRoom(room._id)} className="btn">
-                    Join
+                  <button onClick={() => joinRoom(room._id)} className="btn" >
+                    {room.gameStarted ? "Started":"Join"}
                   </button>
                 </p>
               </li>

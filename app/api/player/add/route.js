@@ -15,6 +15,7 @@ export async function POST(req) {
       player.avatar = user.imageUrl;
       player.id = user.id;
       player.guns = 0;
+      player.role = null;
       gameRoom.players.push(player);
       await gameRoom.save();
       await pusherServer.trigger(roomId, "player-joined", player);

@@ -16,6 +16,10 @@ const gameRoomSchema = new Schema(
       type: String,
       required: true,
     },
+    gameStarted: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );

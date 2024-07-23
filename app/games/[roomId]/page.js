@@ -4,7 +4,9 @@ import { pusherClient } from "@/lib/pusher";
 import toast from "react-hot-toast";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { MdOutlineExitToApp, MdDeleteOutline } from "react-icons/md";
+import { MdOutlineExitToApp, MdDeleteOutline, MdAnchor } from "react-icons/md";
+import { FaGitkraken } from "react-icons/fa6";
+import { GiPirateFlag } from "react-icons/gi";
 import PlayersList from "@/components/PlayersList";
 
 export default function GamePage({ params }) {
@@ -14,6 +16,7 @@ export default function GamePage({ params }) {
   const [eventValue, setEvent] = useState("");
   const [gameRoom, setGameRoom] = useState({});
   const [players, setPlayers] = useState([]);
+  const [currentPlayer, setCurrentPlayer] = useState([]);
   const { isLoaded, user } = useUser();
   const { roomId } = params;
 
@@ -23,7 +26,8 @@ export default function GamePage({ params }) {
     if (res.ok) {
       const data = await res.json();
       setGameRoom(data[0]);
-      setPlayers(data[0].players);
+      setPlayers(data[0]?.players);
+      setCurrentPlayer(data[0].players.find((player) => player.id === user.id));
     }
   };
 
@@ -76,19 +80,13 @@ export default function GamePage({ params }) {
     if (toatalGuns + value > 3) {
       return toast.error("Only 3 guns can be distributed");
     }
-    if (player.guns + value > 3) {
-      return toast.error("Cannot give more than 3");
-    }
+
     if (player.guns + value < 0) {
       return toast.error("no negative values");
     }
     toatalGuns += value;
     player.guns += value;
     document.getElementById(player.id).innerHTML = player.guns;
-  };
-
-  const handleGunDistribution = (e, player) => {
-    player.guns = e.target.value;
   };
 
   const distributeGuns = async () => {
@@ -110,8 +108,24 @@ export default function GamePage({ params }) {
     );
   };
 
+  const chooseRole = async (value) => {
+    setCurrentPlayer({ ...currentPlayer, role: value });
+    await fetch("/api/player/update", {
+      method: "POST",
+      body: JSON.stringify({ roomId, currentPlayer, role: value }),
+    });
+  };
+
+  const startGame = async () => {
+    setGameRoom({ ...gameRoom, gameStarted: true });
+    await fetch("/api/game/start", {
+      method: "POST",
+      body: JSON.stringify({roomId}),
+    });
+  };
+
   useEffect(() => {
-    updateRoom();
+    user && updateRoom();
 
     pusherClient.subscribe(roomId);
 
@@ -149,7 +163,7 @@ export default function GamePage({ params }) {
       const { cultLeader, playerId } = data;
       const canVibrate = window.navigator.vibrate;
       if (user?.id === playerId) {
-        customToast(cultLeader, "has recriuted you!", 1000);
+        customToast(cultLeader, "has recriuted you!", 10000);
         if (canVibrate) navigator.vibrate([225, 50, 225]);
       } else {
         if (canVibrate) navigator.vibrate(500);
@@ -159,32 +173,62 @@ export default function GamePage({ params }) {
     });
     pusherClient.bind("guns", (players) => {
       players.forEach((player) => {
-        if (user.id === player.id) {
+        if (currentPlayer.id === player.id) {
           customToast(player, `you have been awarded ${player.guns} gun(s)`, 10000);
         } else {
           customToast(player, `has been awarded ${player.guns} gun(s)`, 10000);
         }
       });
+      const canVibrate = window.navigator.vibrate;
       if (canVibrate) navigator.vibrate(500);
       setToggleEventModle(false);
       setToggleEventMenu(false);
+    });
+    pusherClient.bind("game-started", (gameRoom) => {
+      updateRoom();
+      toast.success(`${gameRoom.name}has started!`, { id: gameRoom.id });
     });
 
     return () => {
       pusherClient.unsubscribe(roomId);
     };
-  }, []);
+  }, [user]);
 
   return (
     <section>
       <h2>{gameRoom.name}</h2>
+      {currentPlayer && (
+        <p>
+          {currentPlayer.username} ({currentPlayer.role})
+        </p>
+      )}
+      {!currentPlayer?.role && (
+        <div div className="modle">
+          <h3>please choose a role</h3>
+          <span onClick={() => chooseRole("sailor")}>
+            <MdAnchor size={128} color="royalBlue" />
+          </span>
+          <span onClick={() => chooseRole("pirate")}>
+            <GiPirateFlag size={128} color="red" />
+          </span>
+          <span onClick={() => chooseRole("cult leader")}>
+            <FaGitkraken size={128} color="#fec615" />
+          </span>
+        </div>
+      )}
       <MdOutlineExitToApp size={28} className="btn-leave" onClick={leaveRoom} />
       {user && user.id === gameRoom.gameAdmin && (
         <>
           <MdDeleteOutline className="btn-delete" onClick={deleteRoom} size={28} />
-          <button onClick={startEvent} className="btn btn-event">
-            Start Event
-          </button>
+          {gameRoom.gameStarted ? (
+            <button onClick={startEvent} className="btn btn-event">
+              Start Event
+            </button>
+          ) : (
+            <button className="btn btn-event" onClick={startGame}>
+              Start Game
+            </button>
+          )}
           {toggleEventMenu && (
             <div className="modle">
               <select onChange={(e) => setEvent(e.target.value)}>
@@ -205,7 +249,8 @@ export default function GamePage({ params }) {
           <h3>{eventValue} event has start</h3>
           <p>Cult Leader pick a player to join your team</p>
           <ul>
-            {players &&
+            {currentPlayer.role === "cult leader" &&
+              players &&
               players.length > 0 &&
               players
                 .filter((player) => user.id !== player.id)
@@ -224,7 +269,8 @@ export default function GamePage({ params }) {
             <h3>{eventValue} event has start</h3>
             <p>Cult Leader 3 guns to any player(s)</p>
             <ul>
-              {gameRoom.players.length > 0 &&
+              {currentPlayer.role === "cult leader" &&
+                gameRoom.players.length > 0 &&
                 gameRoom.players.map((player) => (
                   <li key={player.id}>
                     <img src={player.avatar} alt="" className="avatar" />
@@ -241,7 +287,7 @@ export default function GamePage({ params }) {
           </section>
         </div>
       )}
-      <PlayersList players={gameRoom.players} />
+      <PlayersList players={gameRoom.players} currentPlayer={currentPlayer} />
     </section>
   );
 }
