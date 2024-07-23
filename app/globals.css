@@ -174,7 +174,7 @@ nav .cl-avatarBox {
   cursor: pointer;
   transition: background-color 0.25s;
   background-color: var(--blue);
-  color: white;
+  color: #fff;
   width: 100%;
 }
 
@@ -208,7 +208,7 @@ nav .cl-avatarBox {
 
 .btn:hover {
   background-color: var(--red);
-  color: white;
+ 
 }
 
 .icon {
