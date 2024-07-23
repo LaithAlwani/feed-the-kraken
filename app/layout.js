@@ -42,4 +42,3 @@ const Navbar = () => {
     </nav>
   );
 };
-

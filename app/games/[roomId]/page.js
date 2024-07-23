@@ -203,7 +203,7 @@ export default function GamePage({ params }) {
         </div>
       )}
       <MdOutlineExitToApp size={28} className="btn-leave" onClick={leaveRoom} />
-      {user && user.id === gameRoom.gameAdmin && (
+      {user?.id === gameRoom.gameAdmin && (
         <>
           {gameRoom.gameStarted ? (
             <button onClick={startEvent} className="btn btn-event">

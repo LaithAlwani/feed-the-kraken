@@ -9,7 +9,7 @@ export default function GameRoomList({ gameRooms, joinRoom, deleteRoom, user }) 
           <li key={_id} className="game-room-list-item">
             <h3>{name}</h3>{" "}
             <span>
-              ({players.length}/11){" "}
+              ({players.length}/11)
               {user?.id === gameAdmin && (
                 <MdDeleteOutline className="btn-delete" onClick={() => deleteRoom(_id)} size={28} />
               )}
