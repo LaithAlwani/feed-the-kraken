@@ -4,10 +4,12 @@ import { pusherClient } from "@/lib/pusher";
 import toast from "react-hot-toast";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { MdOutlineExitToApp, MdAnchor } from "react-icons/md";
-import { FaGitkraken } from "react-icons/fa6";
-import { GiPirateFlag } from "react-icons/gi";
+import { MdOutlineExitToApp } from "react-icons/md";
 import PlayersList from "@/components/PlayersList";
+import ChooseEvent from "@/components/ChooseEvent";
+import ChooseRole from "@/components/ChooseRole";
+import Recruit from "@/components/Recruit";
+import GiveGuns from "@/components/GiveGuns";
 
 export default function GamePage({ params }) {
   const router = useRouter();
@@ -27,7 +29,7 @@ export default function GamePage({ params }) {
       const data = await res.json();
       setGameRoom(data[0]);
       setPlayers(data[0]?.players);
-      setCurrentPlayer(data[0].players.find((player) => player.id === user.id));
+      setCurrentPlayer(data[0]?.players.find((player) => player.id === user?.id));
     }
   };
 
@@ -68,25 +70,30 @@ export default function GamePage({ params }) {
     });
   };
 
-  let toatalGuns = 0;
+  const [totalGuns, setTotalGuns] = useState(0);
   const gunTotal = (player, value) => {
-    if (toatalGuns + value > 3) {
+    if (totalGuns + value > 3) {
       return toast.error("Only 3 guns can be distributed");
     }
 
     if (player.guns + value < 0) {
       return toast.error("no negative values");
     }
-    toatalGuns += value;
+    setTotalGuns((prev) => prev + value);
     player.guns += value;
     document.getElementById(player.id).innerHTML = player.guns;
   };
 
   const distributeGuns = async () => {
-    await fetch("/api/game/event/guns", {
+    if (totalGuns != 3) return toast.error("you must give out 3 guns!");
+    const res = await fetch("/api/game/event/guns", {
       method: "POST",
       body: JSON.stringify({ roomId, players }),
     });
+    if (res.ok) {
+      gameRoom.players.forEach((player) => (player.guns = 0));
+      setTotalGuns(0);
+    }
   };
 
   const customToast = (player, message, duration) => {
@@ -113,7 +120,7 @@ export default function GamePage({ params }) {
     setGameRoom({ ...gameRoom, gameStarted: true });
     await fetch("/api/game/start", {
       method: "POST",
-      body: JSON.stringify({roomId}),
+      body: JSON.stringify({ roomId }),
     });
   };
 
@@ -190,23 +197,9 @@ export default function GamePage({ params }) {
   return (
     <section>
       <h2>{gameRoom.name}</h2>
-      {currentPlayer && (
-        <p>
-          {currentPlayer.username} ({currentPlayer.role})
-        </p>
-      )}
       {!currentPlayer?.role && (
         <div div className="modle">
-          <h3>please choose a role</h3>
-          <span onClick={() => chooseRole("sailor")}>
-            <MdAnchor size={128} color="#47a5cb" />
-          </span>
-          <span onClick={() => chooseRole("pirate")}>
-            <GiPirateFlag size={128} color="#984141" />
-          </span>
-          <span onClick={() => chooseRole("cult leader")}>
-            <FaGitkraken size={128} color="#cab81b" />
-          </span>
+          <ChooseRole chooseRole={chooseRole} />
         </div>
       )}
       <MdOutlineExitToApp size={28} className="btn-leave" onClick={leaveRoom} />
@@ -223,60 +216,31 @@ export default function GamePage({ params }) {
           )}
           {toggleEventMenu && (
             <div className="modle">
-              <select onChange={(e) => setEvent(e.target.value)}>
-                <option value="">Choose Event</option>
-                <option value="recruit">Recruit</option>
-                <option value="give 3 guns">Give 3 guns</option>
-                <option value="check navigation team">Check Navigation Team</option>
-              </select>
-              <button className="btn btn-event" onClick={chooseEvent}>
-                Choose Event
-              </button>
+              <ChooseEvent setEvent={setEvent} chooseEvent={chooseEvent} />
             </div>
           )}
         </>
       )}
       {toggleEventModle && eventValue === "recruit" && (
         <div className="modle">
-          <h3>{eventValue} event has start</h3>
-          <p>Cult Leader pick a player to join your team</p>
-          <ul>
-            {currentPlayer.role === "cult leader" &&
-              players &&
-              players.length > 0 &&
-              players
-                .filter((player) => user.id !== player.id)
-                .map((player) => (
-                  <li key={player.id} onClick={() => choosePlayerToRecruit(player.id)}>
-                    <img src={player.avatar} alt="" className="avatar" />
-                    {player.username}
-                  </li>
-                ))}
-          </ul>
+          <Recruit
+            currentPlayer={currentPlayer}
+            players={gameRoom.players}
+            eventValue={eventValue}
+            choosePlayerToRecruit={choosePlayerToRecruit}
+          />
         </div>
       )}
       {toggleEventModle && eventValue === "give 3 guns" && (
         <div className="modle">
-          <section>
-            <h3>{eventValue} event has start</h3>
-            <p>Cult Leader 3 guns to any player(s)</p>
-            <ul>
-              {currentPlayer.role === "cult leader" &&
-                gameRoom.players.length > 0 &&
-                gameRoom.players.map((player) => (
-                  <li key={player.id}>
-                    <img src={player.avatar} alt="" className="avatar" />
-                    {player.username}
-                    <span onClick={() => gunTotal(player, -1)}>-</span>
-                    <span id={player.id}>{player.guns}</span>
-                    <span onClick={() => gunTotal(player, 1)}>+</span>
-                  </li>
-                ))}
-            </ul>
-            <button className="btn btn-event" onClick={distributeGuns}>
-              Done
-            </button>
-          </section>
+          <GiveGuns
+            eventValue={eventValue}
+            currentPlayer={currentPlayer}
+            players={gameRoom.players}
+            distributeGuns={distributeGuns}
+            gunTotal={gunTotal}
+            totalGuns={totalGuns}
+          />
         </div>
       )}
       <PlayersList players={gameRoom.players} currentPlayer={currentPlayer} />
