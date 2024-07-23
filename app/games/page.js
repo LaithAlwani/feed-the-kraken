@@ -1,4 +1,5 @@
 "use client";
+import GameRoomList from "@/components/GameRoomList";
 import { pusherClient } from "@/lib/pusher";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
@@ -20,7 +21,6 @@ export default function GamesPage() {
         const data = await res.json();
         setGameRooms([]);
         data.forEach((gameRoom) => {
-  
           setGameRooms((prev) => [...prev, gameRoom]);
         });
       }
@@ -38,6 +38,17 @@ export default function GamesPage() {
     });
     if (res.ok) {
       router.push(`/games/${roomId}`);
+    }
+  };
+
+  const deleteRoom = async (roomId) => {
+    const res = await fetch("/api/game/delete", {
+      method: "POST",
+      body: JSON.stringify({ roomId }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      toast.success(data.message);
     }
   };
 
@@ -66,23 +77,15 @@ export default function GamesPage() {
       {loading ? (
         <p>loading...</p>
       ) : (
-        <ul className="game-room-list">
-          {gameRooms.length > 0 ? (
-            gameRooms.map((room) => (
-              <li key={room._id} className="game-room-list-item">
-                <h3>{room.name}</h3>{" "}
-                <p>
-                  ({room.players.length}/11){" "}
-                  <button onClick={() => joinRoom(room._id)} className="btn" >
-                    {room.gameStarted ? "Started":"Join"}
-                  </button>
-                </p>
-              </li>
-            ))
-          ) : (
-            <h3>No Active games available</h3>
-          )}
-        </ul>
+        <>
+          {console.log(gameRooms)}
+          <GameRoomList
+            gameRooms={gameRooms}
+            joinRoom={joinRoom}
+            deleteRoom={deleteRoom}
+            user={user}
+          />
+        </>
       )}
     </>
   );

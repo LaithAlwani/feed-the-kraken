@@ -4,7 +4,7 @@ import { pusherClient } from "@/lib/pusher";
 import toast from "react-hot-toast";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { MdOutlineExitToApp, MdDeleteOutline, MdAnchor } from "react-icons/md";
+import { MdOutlineExitToApp, MdAnchor } from "react-icons/md";
 import { FaGitkraken } from "react-icons/fa6";
 import { GiPirateFlag } from "react-icons/gi";
 import PlayersList from "@/components/PlayersList";
@@ -39,13 +39,6 @@ export default function GamePage({ params }) {
     if (res.ok) {
       router.push("/games");
     }
-  };
-
-  const deleteRoom = async () => {
-    await fetch("/api/game/delete", {
-      method: "POST",
-      body: JSON.stringify({ roomId }),
-    });
   };
 
   const startEvent = () => {
@@ -206,20 +199,19 @@ export default function GamePage({ params }) {
         <div div className="modle">
           <h3>please choose a role</h3>
           <span onClick={() => chooseRole("sailor")}>
-            <MdAnchor size={128} color="royalBlue" />
+            <MdAnchor size={128} color="#47a5cb" />
           </span>
           <span onClick={() => chooseRole("pirate")}>
-            <GiPirateFlag size={128} color="red" />
+            <GiPirateFlag size={128} color="#984141" />
           </span>
           <span onClick={() => chooseRole("cult leader")}>
-            <FaGitkraken size={128} color="#fec615" />
+            <FaGitkraken size={128} color="#cab81b" />
           </span>
         </div>
       )}
       <MdOutlineExitToApp size={28} className="btn-leave" onClick={leaveRoom} />
       {user && user.id === gameRoom.gameAdmin && (
         <>
-          <MdDeleteOutline className="btn-delete" onClick={deleteRoom} size={28} />
           {gameRoom.gameStarted ? (
             <button onClick={startEvent} className="btn btn-event">
               Start Event

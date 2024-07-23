@@ -5,9 +5,7 @@ export default function Home() {
   return (
     <>
       <div className="hero">
-        <Link href="/">
-          <img src="https://funtails.de/wp-content/uploads/2020/01/ftk_logo_center.png" alt="" />
-        </Link>
+        {/* <img src="https://funtails.de/wp-content/uploads/2020/01/ftk_logo_center.png" alt="" /> */}
       </div>
       <div>
         <h3>A Companion App</h3>
@@ -15,7 +13,9 @@ export default function Home() {
           <SignInButton className="btn" />
         </SignedOut>
         <SignedIn>
-          <Link href={"/games"} className="btn btn-alt">Play</Link>
+          <Link href={"/games"} className="btn btn-alt">
+            Play
+          </Link>
         </SignedIn>
       </div>
     </>

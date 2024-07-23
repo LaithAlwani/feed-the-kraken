@@ -125,7 +125,8 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  max-width: 62rem;
+  margin-inline: auto;
 }
 nav .cl-avatarBox {
   width: 3rem;
@@ -161,15 +162,20 @@ nav .cl-avatarBox {
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.25s;
-  background-color: royalblue;
+  background-color: #47a5cb;
   color: white;
 }
 
+.btn:disabled {
+  cursor: not-allowed;
+}
+.btn:disabled:hover {
+  background-color: #47a5cb;
+}
+
 .btn-delete {
-  position: fixed;
-  top: 6rem;
-  right: 1rem;
-  color: red;
+  color: #984141;
+  cursor: pointer;
 }
 
 .btn-leave {
@@ -177,20 +183,19 @@ nav .cl-avatarBox {
   top: 6rem;
   left: 1rem;
   transform: scaleX(-1);
-  color: red;
+  color: #984141;
 }
 
 .btn-event {
   position: fixed;
   bottom: 1rem;
   right: 1rem;
-  background-color: yellow;
+  background-color: #cab81b;
   color: #333;
 }
 
-
 .btn:hover {
-  background-color: red;
+  background-color: #984141;
   color: white;
 }
 
@@ -225,6 +230,12 @@ nav .cl-avatarBox {
   justify-content: space-between;
 }
 
+.game-room-list .game-room-list-item span {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+}
 .modle {
   position: fixed;
   display: flex;
@@ -267,5 +278,11 @@ nav .cl-avatarBox {
   100% {
     transform: translate3d(0, 0, 0) scale(1);
     opacity: 1;
+  }
+}
+
+@media only screen and (min-width: 769px) {
+  nav {
+    padding-inline: 0;
   }
 }

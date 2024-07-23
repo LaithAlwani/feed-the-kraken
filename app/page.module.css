@@ -1,5 +1,6 @@
 .main {
-  width: 100%;
+  max-width: 960px;
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -9,7 +10,9 @@
   text-align: center;
 }
 
-
+.main img{
+  max-width: 300px;
+}
 
 /* Mobile */
 @media (max-width: 768px) {
