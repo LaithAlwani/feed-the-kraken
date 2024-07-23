@@ -16,7 +16,6 @@ export default function RootLayout({ children }) {
       <html lang="en">
         <body>
           <Toaster />
-            
           <Navbar />
           <main className={styles.main}>{children}</main>
         </body>
