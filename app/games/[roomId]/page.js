@@ -70,18 +70,17 @@ export default function GamePage({ params }) {
       body: JSON.stringify({ roomId, playerId, cultLeader }),
     });
   };
-  
+
   let toatalGuns = 0;
   const gunTotal = (player, value) => {
-    
     if (toatalGuns + value > 3) {
-      return toast.error("Only 3 guns can be distributed")
+      return toast.error("Only 3 guns can be distributed");
     }
     if (player.guns + value > 3) {
-      return toast.error("Cannot give more than 3")
+      return toast.error("Cannot give more than 3");
     }
     if (player.guns + value < 0) {
-      return toast.error("no negative values")
+      return toast.error("no negative values");
     }
     toatalGuns += value;
     player.guns += value;
@@ -148,11 +147,12 @@ export default function GamePage({ params }) {
 
     pusherClient.bind("recruit", (data) => {
       const { cultLeader, playerId } = data;
+      const canVibrate = window.navigator.vibrate;
       if (user?.id === playerId) {
         customToast(cultLeader, "has recriuted you!", 1000);
-        navigator.vibrate([225, 50, 225]);
+        if (canVibrate) navigator.vibrate([225, 50, 225]);
       } else {
-        navigator.vibrate(500);
+        if (canVibrate) navigator.vibrate(500);
       }
       setToggleEventModle(false);
       setToggleEventMenu(false);
@@ -165,7 +165,7 @@ export default function GamePage({ params }) {
           customToast(player, `has been awarded ${player.guns} gun(s)`, 10000);
         }
       });
-      navigator.vibrate(500);
+      if (canVibrate) navigator.vibrate(500);
       setToggleEventModle(false);
       setToggleEventMenu(false);
     });

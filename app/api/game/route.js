@@ -25,7 +25,8 @@ export async function POST(req) {
     players.push({
       username: user.fullName,
       avatar: user.imageUrl,
-      id:user.id
+      id: user.id,
+      guns:0
     })
     const gameRoom = await GameRoom.create({ name: roomName, players, gameAdmin: user.id });
       await pusherServer.trigger("lobby", "room-created", gameRoom);
