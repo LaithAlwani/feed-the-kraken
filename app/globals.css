@@ -104,6 +104,12 @@ a {
   text-decoration: none;
 }
 
+form{
+  max-width: 600px;
+  width: 100%;
+  padding: 1rem;
+}
+
 ul {
   padding: 0;
   list-style: none;
@@ -201,7 +207,7 @@ nav .cl-avatarBox {
 .btn-event {
   position: fixed;
   bottom: 1rem;
-  right: 1rem;
+  right: 0;
   background-color: var(--yellow);
   color: #333;
 }
@@ -238,6 +244,7 @@ nav .cl-avatarBox {
   padding: 1rem;
 }
 
+
 .game-room-list .game-room-list-item {
   justify-content: space-between;
 }
@@ -247,6 +254,9 @@ nav .cl-avatarBox {
   justify-content: flex-end;
   align-items: center;
   gap: 0.5rem;
+}
+.game-room-list .game-room-list-item .btn{
+  width: 75%;
 }
 .modle {
   position: fixed;

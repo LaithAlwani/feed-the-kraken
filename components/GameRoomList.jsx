@@ -11,7 +11,7 @@ export default function GameRoomList({ gameRooms, joinRoom, deleteRoom, user }) 
             <span>
               ({players.length}/11)
               {user?.id === gameAdmin && (
-                <MdDeleteOutline className="btn-delete" onClick={() => deleteRoom(_id)} size={28} />
+                <MdDeleteOutline className="btn-delete" onClick={() => deleteRoom(_id)} size={32} />
               )}
               <button onClick={() => joinRoom(_id)} className="btn" disabled={gameStarted}>
                 {gameStarted ? "Started" : "Join"}

@@ -42,14 +42,10 @@ export default function GamesPage() {
   };
 
   const deleteRoom = async (roomId) => {
-    const res = await fetch("/api/game/delete", {
+    await fetch("/api/game/delete", {
       method: "POST",
       body: JSON.stringify({ roomId }),
     });
-    if (res.ok) {
-      const data = await res.json();
-      toast.success(data.message);
-    }
   };
 
   useEffect(() => {

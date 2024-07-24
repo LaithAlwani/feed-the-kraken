@@ -8,6 +8,7 @@ export default function CreateGamePage() {
   const { isLoaded, user } = useUser();
   const router = useRouter();
   const [roomName, setRoomName] = useState("");
+  const [password, setPassword] = useState("");
   
 
   const createGameRoom = async (e) => {
@@ -17,7 +18,7 @@ export default function CreateGamePage() {
       headers: {
         "Content-type": "application/json",
       },
-      body: JSON.stringify({roomName, user}),
+      body: JSON.stringify({roomName, password, user}),
     });
     if (res.ok) {
       const data = await res.json();
@@ -29,7 +30,8 @@ export default function CreateGamePage() {
   return (
     <>
       <form onSubmit={createGameRoom}>
-        <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} />
+        <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="Room Name"/>
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"/>
         <button className="btn">Create</button>
       </form>
     </>

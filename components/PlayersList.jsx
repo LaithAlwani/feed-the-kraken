@@ -7,7 +7,7 @@ export default function PlayersList({ players, currentPlayer }) {
           <li key={player.id}>
             <img src={player.avatar} alt="" className="avatar" />
             {player.username}
-            {currentPlayer.id === player.id && player.role != "pirate" ? ` (${player.role})` : ""}
+            {currentPlayer.id === player.id && player.role != "pirate" ? ` (${currentPlayer.role})` : ""}
             {currentPlayer?.role === "pirate" && player.role === "pirate"
               ? ` (${player.role})`
               : ""}

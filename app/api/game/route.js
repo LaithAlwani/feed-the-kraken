@@ -14,7 +14,7 @@ export async function GET() {
 }
 
 export async function POST(req) {
-  const { roomName, user } = await req.json();
+  const { roomName, password, user } = await req.json();
 
   try {
     await connectToDB();
@@ -28,6 +28,7 @@ export async function POST(req) {
     });
     const gameRoom = await GameRoom.create({
       name: roomName,
+      password,
       players,
       gameAdmin: user.id,
       gameStarted: false,

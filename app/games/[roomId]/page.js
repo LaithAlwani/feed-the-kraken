@@ -88,7 +88,7 @@ export default function GamePage({ params }) {
     if (totalGuns != 3) return toast.error("you must give out 3 guns!");
     const res = await fetch("/api/game/event/guns", {
       method: "POST",
-      body: JSON.stringify({ roomId, players }),
+      body: JSON.stringify({ roomId, players:gameRoom.players }),
     });
     if (res.ok) {
       gameRoom.players.forEach((player) => (player.guns = 0));
@@ -186,7 +186,7 @@ export default function GamePage({ params }) {
     });
     pusherClient.bind("game-started", (gameRoom) => {
       updateRoom();
-      toast.success(`${gameRoom.name}has started!`, { id: gameRoom.id });
+      toast.success(`${gameRoom.name} has started!`, { id: gameRoom._id });
     });
 
     return () => {

@@ -6,7 +6,10 @@ const gameRoomSchema = new Schema(
       type: String,
       required: true,
     },
-
+    password: {
+      type: String,
+      required:true
+    },
     players: [
       {
         type: Object,
