@@ -110,6 +110,7 @@ export default function GamePage({ params }) {
   };
 
   const chooseRole = async (value) => {
+    console.log("choosing")
     setCurrentPlayer({ ...currentPlayer, role: value });
     await fetch("/api/player/update", {
       method: "POST",
@@ -198,7 +199,7 @@ export default function GamePage({ params }) {
   return (
     <section>
       <h2>{gameRoom.name}</h2>
-      { currentPlayer && 
+      { !currentPlayer?.role && 
         <div className="modle">
           <ChooseRole chooseRole={chooseRole} />
         </div>
