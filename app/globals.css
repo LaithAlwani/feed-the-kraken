@@ -3,7 +3,7 @@
   --blue: #47a5cb;
   --red: #984141;
   --yellow: #cab81b;
-  
+
   --border-radius: 0.5rem;
 
   --foreground-rgb: 0, 0, 0;
@@ -49,13 +49,13 @@ a {
   text-decoration: none;
 }
 
-form{
+form {
   max-width: 600px;
   width: 100%;
   margin-inline: auto;
 }
 
-form .btn{
+form .btn {
   width: 100%;
 }
 
@@ -70,7 +70,8 @@ li {
   justify-content: flex-start;
   margin-bottom: 0.5rem;
 }
-input, select {
+input,
+select {
   width: 100%;
   padding: 1rem;
   border-radius: 0.25rem;
@@ -95,8 +96,6 @@ nav .cl-avatarBox {
   height: 100%;
 }
 
-
-
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
@@ -109,8 +108,7 @@ nav .cl-avatarBox {
 
 .hero {
   position: relative;
-  width: 100%;
-  
+  width: 100vw;
 }
 
 .hero .img {
@@ -120,8 +118,7 @@ nav .cl-avatarBox {
   object-fit: cover;
 }
 
-
-.hero-content{
+.hero-content {
   position: absolute;
   top: 0;
   left: 0;
@@ -134,7 +131,6 @@ nav .cl-avatarBox {
   background-color: #3333338b;
   color: #fff;
 }
-
 
 .btn {
   display: block;
@@ -210,7 +206,6 @@ nav .cl-avatarBox {
   margin-inline: auto;
 }
 
-
 .game-room-list .game-room-list-item {
   justify-content: space-between;
 }
@@ -221,7 +216,6 @@ nav .cl-avatarBox {
   align-items: center;
   gap: 0.5rem;
 }
-
 
 .modle {
   position: fixed;
@@ -237,7 +231,7 @@ nav .cl-avatarBox {
   background-color: rgb(var(--background-start-rgb));
 }
 
-.modle ul{
+.modle ul {
   max-width: 30rem;
   width: 100%;
 }
@@ -316,6 +310,4 @@ nav .cl-avatarBox {
 }
 
 @media only screen and (min-width: 769px) {
- 
-  
 }
