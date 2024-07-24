@@ -28,12 +28,13 @@ export default function CreateGamePage() {
   };
 
   return (
-    <>
+    <section>
+      <h2>Create A Game Room!</h2>
       <form onSubmit={createGameRoom}>
         <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="Room Name"/>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"/>
         <button className="btn">Create</button>
       </form>
-    </>
+    </section>
   );
 }

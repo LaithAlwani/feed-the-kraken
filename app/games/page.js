@@ -65,7 +65,7 @@ export default function GamesPage() {
     };
   }, []);
   return (
-    <>
+    <section>
       <Link href="/games/create" className="btn icon">
         <FaPlus />
       </Link>
@@ -83,6 +83,6 @@ export default function GamesPage() {
           />
         </>
       )}
-    </>
+    </section>
   );
 }

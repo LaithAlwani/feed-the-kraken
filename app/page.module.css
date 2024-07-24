@@ -5,25 +5,6 @@
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  padding-block-start: 6rem;
   min-height: 100svh;
   text-align: center;
-}
-
-.main img {
-  /* max-width: 300px; */
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-}
-
-/* Tablet and Smaller Desktop */
-@media (min-width: 769px) and (max-width: 1120px) {
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert(1) drop-shadow(0 0 0.3rem #ffffff70);
-  }
 }

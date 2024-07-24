@@ -78,9 +78,7 @@
   box-sizing: border-box;
   font-family: "Skranji", system-ui;
   font-weight: 400;
-  font-style: normal;
-  font-size: 1.05rem;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 html,
@@ -97,7 +95,9 @@ body {
     rgb(var(--background-start-rgb));
 }
 section {
-  max-width: 40rem;
+  padding-block-start: 6rem;
+  width: 100%;
+  padding-inline: 1rem;
 }
 a {
   color: inherit;
@@ -107,7 +107,11 @@ a {
 form{
   max-width: 600px;
   width: 100%;
-  padding: 1rem;
+  margin-inline: auto;
+}
+
+form .btn{
+  width: 100%;
 }
 
 ul {
@@ -121,7 +125,7 @@ li {
   justify-content: flex-start;
   margin-bottom: 0.5rem;
 }
-input {
+input, select {
   width: 100%;
   padding: 1rem;
   border-radius: 0.25rem;
@@ -131,11 +135,12 @@ input {
 
 nav {
   position: fixed;
+  top: 0;
+  left: 0;
   padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 62rem;
   width: 100%;
   margin-inline: auto;
   z-index: 1;
@@ -145,9 +150,13 @@ nav .cl-avatarBox {
   height: 100%;
 }
 
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
+  }
+  .logo {
+    filter: invert(1) drop-shadow(0 0 0.3rem #ffffff70);
   }
 }
 
@@ -158,16 +167,25 @@ nav .cl-avatarBox {
 }
 
 .hero .img {
+  display: block;
   width: 100%;
-  height: 50svh;
+  height: 100svh;
   object-fit: cover;
 }
-.hero .image-text{
+
+
+.hero-content{
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  width: 33%;
-  display: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #3333338b;
+  color: #fff;
 }
 
 
@@ -181,7 +199,6 @@ nav .cl-avatarBox {
   transition: background-color 0.25s;
   background-color: var(--blue);
   color: #fff;
-  width: 100%;
 }
 
 .btn:disabled {
@@ -208,13 +225,14 @@ nav .cl-avatarBox {
   position: fixed;
   bottom: 1rem;
   right: 0;
+  width: 100%;
   background-color: var(--yellow);
   color: #333;
 }
 
 .btn:hover {
   background-color: var(--red);
- 
+  color: #fff;
 }
 
 .icon {
@@ -242,6 +260,7 @@ nav .cl-avatarBox {
   max-width: 640px;
   width: 100%;
   padding: 1rem;
+  margin-inline: auto;
 }
 
 
@@ -255,9 +274,8 @@ nav .cl-avatarBox {
   align-items: center;
   gap: 0.5rem;
 }
-.game-room-list .game-room-list-item .btn{
-  width: 75%;
-}
+
+
 .modle {
   position: fixed;
   display: flex;
@@ -266,9 +284,15 @@ nav .cl-avatarBox {
   flex-direction: column;
   top: 0;
   left: 0;
+  padding: 1rem;
   width: 100vw;
   height: 100svh;
   background-color: rgb(var(--background-start-rgb));
+}
+
+.modle ul{
+  max-width: 30rem;
+  width: 100%;
 }
 
 .custom-toast {
@@ -328,8 +352,9 @@ nav .cl-avatarBox {
 
 .gun-counter {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
   margin-left: auto;
+  font-size: 1.2rem;
 }
 
 @keyframes custom-animation {
@@ -344,10 +369,6 @@ nav .cl-avatarBox {
 }
 
 @media only screen and (min-width: 769px) {
-  nav {
-    padding-inline: 0;
-  }
-  .hero .image-text{
-    display: block;
-  }
+ 
+  
 }

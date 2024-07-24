@@ -1,6 +1,12 @@
-import React from "react";
-
-export default function GiveGuns({ eventValue, currentPlayer, players,totalGuns, distributeGuns, gunTotal }) {
+import { MdAdd, MdHorizontalRule } from "react-icons/md";
+export default function GiveGuns({
+  eventValue,
+  currentPlayer,
+  players,
+  totalGuns,
+  distributeGuns,
+  gunTotal,
+}) {
   return (
     <>
       <h3>{eventValue} event has start</h3>
@@ -15,9 +21,9 @@ export default function GiveGuns({ eventValue, currentPlayer, players,totalGuns,
                   <img src={player.avatar} alt="" className="avatar" />
                   <h3>{player.username}</h3>
                   <div className="gun-counter">
-                    <span onClick={() => gunTotal(player, -1)}>-</span>
+                    <MdHorizontalRule onClick={() => gunTotal(player, -1)} size={24} />
                     <span id={player.id}>{player.guns}</span>
-                    <span onClick={() => gunTotal(player, 1)}>+</span>
+                    <MdAdd size={24} onClick={() => gunTotal(player, 1)} />
                   </div>
                 </li>
               ))}

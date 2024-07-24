@@ -14,18 +14,17 @@ export default function Home() {
           sizes="100vw"
           className="img"
         />
-        <img src="https://funtails.de/wp-content/uploads/2020/01/ftk_logo_center.png" alt="" className="image-text" />
-      </div>
-      <div>
-        <h3>A Companion App</h3>
-        <SignedOut>
-          <SignInButton className="btn" />
-        </SignedOut>
-        <SignedIn>
-          <Link href={"/games"} className="btn btn-alt">
-            Play
-          </Link>
-        </SignedIn>
+        <div className="hero-content">
+          <h1>A Companion App</h1>
+          <SignedOut>
+            <SignInButton className="btn" />
+          </SignedOut>
+          <SignedIn>
+            <Link href={"/games"} className="btn btn-alt">
+              Play
+            </Link>
+          </SignedIn>
+        </div>
       </div>
     </>
   );
