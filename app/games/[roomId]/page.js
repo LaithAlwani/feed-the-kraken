@@ -163,8 +163,8 @@ export default function GamePage({ params }) {
       const { cultLeader, playerId } = data;
       const canVibrate = window.navigator.vibrate;
       if (user?.id === playerId) {
-        customToast(cultLeader, "has recriuted you!", 10000);
-        if (canVibrate) navigator.vibrate([225, 50, 225]);
+        customToast(cultLeader, "has recriuted you!", 7000);
+        if (canVibrate) navigator.vibrate([150, 25, 150, 25, 150]);
       } else {
         if (canVibrate) navigator.vibrate(500);
       }
@@ -173,10 +173,10 @@ export default function GamePage({ params }) {
     });
     pusherClient.bind("guns", (players) => {
       players.forEach((player) => {
-        if (currentPlayer.id === player.id) {
-          customToast(player, `you have been awarded ${player.guns} gun(s)`, 10000);
+        if (user?.id === player.id) {
+          customToast(player, `you have been awarded ${player.guns} gun(s)`, 7000);
         } else {
-          customToast(player, `has been awarded ${player.guns} gun(s)`, 10000);
+          customToast(player, `has been awarded ${player.guns} gun(s)`, 7000);
         }
       });
       const canVibrate = window.navigator.vibrate;
@@ -230,7 +230,7 @@ export default function GamePage({ params }) {
           )}
         </div>
       )}
-      {currentPlayer && user?.id === gameRoom.gameAdmin &&
+      {currentPlayer && user?.id === gameRoom.gameAdmin && !toggleEventModle &&
         (gameRoom.gameStarted ? (
           <button onClick={startEvent} className="btn btn-event">
             Start Event

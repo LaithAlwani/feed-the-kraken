@@ -291,6 +291,15 @@ nav .cl-avatarBox {
   border: 5px solid var(--red);
 }
 
+.event-card{
+margin-bottom: 3rem;
+cursor: pointer;
+}
+
+.event-card h2{
+  margin: 0;
+}
+
 .gun-counter {
   display: flex;
   gap: 2rem;

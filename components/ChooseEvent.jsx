@@ -1,15 +1,18 @@
-import React from "react";
+import { FaGitkraken } from "react-icons/fa";
+import { GiCrossedPistols } from "react-icons/gi";
 
-export default function ChooseEvent({ chooseEvent}) {
+export default function ChooseEvent({ chooseEvent }) {
   return (
     <>
-      <button className="btn" onClick={()=>chooseEvent("recruit")}>Recruit</button>
-      <button className="btn" onClick={()=>chooseEvent("give 3 guns")}>Distribute 3 Guns</button>
+      <div className="event-card" onClick={() => chooseEvent("recruit")}>
+        <FaGitkraken size={128}/>
+        <h2>Recruit</h2>
+      </div>
+      <div className="event-card" onClick={() => chooseEvent("give 3 guns")}>
+        <GiCrossedPistols size={128}/>
+        <h2>Distribute Guns</h2>
+      </div>
       
-      
-      <button className="btn btn-event" onClick={chooseEvent}>
-        Choose Event
-      </button>
     </>
   );
 }
