@@ -15,23 +15,21 @@ export default function GamePage({ params }) {
   const router = useRouter();
   const [toggleEventMenu, setToggleEventMenu] = useState(false);
   const [toggleEventModle, setToggleEventModle] = useState(false);
-  const [eventValue, setEvent] = useState("");
+  const [currentEvent, setCurrentEvent] = useState("");
   const [gameRoom, setGameRoom] = useState({});
-  const [players, setPlayers] = useState([]);
-  const [currentPlayer, setCurrentPlayer] = useState([]);
+  const [currentPlayer, setCurrentPlayer] = useState(null);
   const { isLoaded, user } = useUser();
   const { roomId } = params;
 
   const updateRoom = async () => {
-    setPlayers([]);
     const res = await fetch(`/api/game/${roomId}`);
     if (res.ok) {
       const data = await res.json();
       setGameRoom(data[0]);
-      setPlayers(data[0]?.players);
-      const cunPly = data[0]?.players.find((player) => player.id === user?.id)
-      setCurrentPlayer(cunPly);
+      setCurrentPlayer(data[0]?.players.find((player) => player.id === user?.id));
     }
+    
+    
   };
 
   const leaveRoom = async () => {
@@ -48,7 +46,8 @@ export default function GamePage({ params }) {
     setToggleEventMenu(!toggleEventMenu);
   };
 
-  const chooseEvent = async () => {
+  const chooseEvent = async (eventValue) => {
+    setCurrentEvent(eventValue);
     const res = await fetch("/api/game/event", {
       method: "POST",
       body: JSON.stringify({ roomId, eventValue }),
@@ -59,7 +58,7 @@ export default function GamePage({ params }) {
   };
 
   const openEventModle = (eventValue) => {
-    setEvent(eventValue);
+    setCurrentEvent(eventValue);
     setToggleEventModle(true);
   };
 
@@ -89,7 +88,7 @@ export default function GamePage({ params }) {
     if (totalGuns != 3) return toast.error("you must give out 3 guns!");
     const res = await fetch("/api/game/event/guns", {
       method: "POST",
-      body: JSON.stringify({ roomId, players:gameRoom.players }),
+      body: JSON.stringify({ roomId, players: gameRoom.players }),
     });
     if (res.ok) {
       gameRoom.players.forEach((player) => (player.guns = 0));
@@ -110,7 +109,6 @@ export default function GamePage({ params }) {
   };
 
   const chooseRole = async (value) => {
-    console.log("choosing")
     setCurrentPlayer({ ...currentPlayer, role: value });
     await fetch("/api/player/update", {
       method: "POST",
@@ -199,52 +197,49 @@ export default function GamePage({ params }) {
   return (
     <section>
       <h2>{gameRoom.name}</h2>
-      { !currentPlayer?.role && 
+      {currentPlayer && !currentPlayer?.role && (
         <div className="modle">
           <ChooseRole chooseRole={chooseRole} />
         </div>
-      }
+      )}
+
       <MdOutlineExitToApp size={28} className="btn-leave" onClick={leaveRoom} />
-      {user?.id === gameRoom.gameAdmin && (
-        <>
-          {gameRoom.gameStarted ? (
-            <button onClick={startEvent} className="btn btn-event">
-              Start Event
-            </button>
+      {toggleEventMenu && (
+        <div className="modle">
+          <ChooseEvent chooseEvent={chooseEvent} />
+        </div>
+      )}
+      {toggleEventModle && (
+        <div className="modle">
+          {currentEvent === "recruit" ? (
+            <Recruit
+              currentPlayer={currentPlayer}
+              players={gameRoom.players}
+              eventValue={currentEvent}
+              choosePlayerToRecruit={choosePlayerToRecruit}
+            />
           ) : (
-            <button className="btn btn-event" onClick={startGame}>
-              Start Game
-            </button>
+            <GiveGuns
+              eventValue={currentEvent}
+              currentPlayer={currentPlayer}
+              players={gameRoom.players}
+              distributeGuns={distributeGuns}
+              gunTotal={gunTotal}
+              totalGuns={totalGuns}
+            />
           )}
-          {toggleEventMenu && (
-            <div className="modle">
-              <ChooseEvent setEvent={setEvent} chooseEvent={chooseEvent} />
-            </div>
-          )}
-        </>
-      )}
-      {toggleEventModle && eventValue === "recruit" && (
-        <div className="modle">
-          <Recruit
-            currentPlayer={currentPlayer}
-            players={gameRoom.players}
-            eventValue={eventValue}
-            choosePlayerToRecruit={choosePlayerToRecruit}
-          />
         </div>
       )}
-      {toggleEventModle && eventValue === "give 3 guns" && (
-        <div className="modle">
-          <GiveGuns
-            eventValue={eventValue}
-            currentPlayer={currentPlayer}
-            players={gameRoom.players}
-            distributeGuns={distributeGuns}
-            gunTotal={gunTotal}
-            totalGuns={totalGuns}
-          />
-        </div>
-      )}
+      {currentPlayer && user?.id === gameRoom.gameAdmin &&
+        (gameRoom.gameStarted ? (
+          <button onClick={startEvent} className="btn btn-event">
+            Start Event
+          </button>
+        ) : (
+          <button className="btn btn-event" onClick={startGame}>
+            Start Game
+          </button>
+        ))}
       <PlayersList players={gameRoom.players} currentPlayer={currentPlayer} />
     </section>
   );

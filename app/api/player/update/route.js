@@ -4,7 +4,6 @@ import GameRoom from "@/models/gameRoom";
 
 export async function POST(req) {
   const { roomId, currentPlayer, role } = await req.json();
-  console.log("updating")
   try {
     await connectToDB();
     const gameRoom = await GameRoom.findOne({ _id: roomId });
