@@ -1,22 +1,20 @@
-
 import "./globals.css";
 import styles from "./page.module.css";
-import  { Toaster } from "react-hot-toast";
-import { ClerkProvider,  } from "@clerk/nextjs";
+import { Toaster } from "react-hot-toast";
+import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
 
-
 export const metadata = {
-    title: "Feed the Kraken App",
+  title: "Feed the Kraken App",
   description: "A Companion app for Feed the Kraken boardgame",
   generator: "Next.js",
   manifest: "/manifest.json",
-  keywords: ["nextjs", "next14", "pwa", "next-pwa"],
+  keywords: ["nextjs", "next14", "pwa", "next-pwa", "boardgames", "feed the kraken"],
   themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#fff" }],
   authors: [
     {
-      name: "imvinojanv",
-      url: "https://www.linkedin.com/in/imvinojanv/",
+      name: "Laith Alwani",
+      url: "https://www.linkedin.com/in/laith-alwani/",
     },
   ],
   viewport:
@@ -32,7 +30,6 @@ export const metadata = {
 // };
 
 export default function RootLayout({ children }) {
-  
   return (
     <ClerkProvider>
       <html lang="en">
@@ -45,5 +42,3 @@ export default function RootLayout({ children }) {
     </ClerkProvider>
   );
 }
-
-

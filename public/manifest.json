@@ -1,6 +1,6 @@
 {
   "name": "Feed the Krakan",
-  "short_name": "Kraken",
+  "short_name": "Feed The Kraken",
   "theme_color": "#47a5cb",
   "background_color": "#ffffff",
   "display": "standalone",
@@ -8,12 +8,6 @@
   "scope": "/",
   "start_url": "/",
   "icons": [
-    {
-      "src": "icons/kraken.png",
-      "sizes": "48x48",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
     {
       "src": "icons/icon-72x72.png",
       "sizes": "72x72",
