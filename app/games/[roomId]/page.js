@@ -29,7 +29,8 @@ export default function GamePage({ params }) {
       const data = await res.json();
       setGameRoom(data[0]);
       setPlayers(data[0]?.players);
-      setCurrentPlayer(data[0]?.players.find((player) => player.id === user?.id));
+      const cunPly = data[0]?.players.find((player) => player.id === user?.id)
+      setCurrentPlayer(cunPly);
     }
   };
 
@@ -197,11 +198,11 @@ export default function GamePage({ params }) {
   return (
     <section>
       <h2>{gameRoom.name}</h2>
-      {!currentPlayer?.role && (
-        <div div className="modle">
+      { currentPlayer && 
+        <div className="modle">
           <ChooseRole chooseRole={chooseRole} />
         </div>
-      )}
+      }
       <MdOutlineExitToApp size={28} className="btn-leave" onClick={leaveRoom} />
       {user?.id === gameRoom.gameAdmin && (
         <>

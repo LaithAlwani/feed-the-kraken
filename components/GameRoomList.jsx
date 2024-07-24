@@ -1,7 +1,7 @@
 import { MdDeleteOutline } from "react-icons/md";
 
 export default function GameRoomList({ gameRooms, joinRoom, deleteRoom, user }) {
-  console.log(gameRooms);
+  
   return (
     <ul className="game-room-list">
       {gameRooms.length > 0 ? (

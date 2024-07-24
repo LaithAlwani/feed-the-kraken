@@ -74,7 +74,6 @@ export default function GamesPage() {
         <p>loading...</p>
       ) : (
         <>
-          {console.log(gameRooms)}
           <GameRoomList
             gameRooms={gameRooms}
             joinRoom={joinRoom}

@@ -9,7 +9,7 @@ export default function Navbar() {
         <Image
           src="https://funtails.de/wp-content/uploads/2020/01/ftk_logo_center.png"
           alt="logo"
-          width={150}
+          width={140}
           height={60}
           className="logo"
         />
