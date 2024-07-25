@@ -96,13 +96,16 @@ nav .cl-avatarBox {
   height: 100%;
 }
 
+.inverted-logo {
+  filter: invert(1) drop-shadow(0 0 0.3rem #ffffff70);
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
   .logo {
     filter: invert(1) drop-shadow(0 0 0.3rem #ffffff70);
-    aspect-ratio: 2.33;
   }
 }
 
@@ -204,7 +207,7 @@ nav .cl-avatarBox {
 .game-room-list {
   max-width: 640px;
   width: 100%;
-  padding: 1rem;
+  padding-block: 1rem;
   margin-inline: auto;
 }
 
@@ -217,6 +220,15 @@ nav .cl-avatarBox {
   justify-content: flex-end;
   align-items: center;
   gap: 0.5rem;
+}
+.join-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.join-btn span {
+  font-size: 0.7rem;
 }
 
 .modle {
@@ -238,7 +250,7 @@ nav .cl-avatarBox {
   width: 100%;
 }
 
-.row{
+.row {
   flex-direction: row;
   gap: 3rem;
 }
@@ -298,12 +310,12 @@ nav .cl-avatarBox {
   border: 5px solid var(--red);
 }
 
-.event-card{
-margin-bottom: 3rem;
-cursor: pointer;
+.event-card {
+  margin-bottom: 3rem;
+  cursor: pointer;
 }
 
-.event-card h3{
+.event-card h3 {
   margin: 0;
 }
 
