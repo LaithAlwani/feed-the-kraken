@@ -205,7 +205,7 @@ export default function GamePage({ params }) {
 
       <MdOutlineExitToApp size={28} className="btn-leave" onClick={leaveRoom} />
       {toggleEventMenu && (
-        <div className="modle">
+        <div className="modle row">
           <ChooseEvent chooseEvent={chooseEvent} />
         </div>
       )}

@@ -1,7 +1,6 @@
 import { MdDeleteOutline } from "react-icons/md";
 
 export default function GameRoomList({ gameRooms, joinRoom, deleteRoom, user }) {
-  
   return (
     <ul className="game-room-list">
       {gameRooms.length > 0 ? (
@@ -13,9 +12,12 @@ export default function GameRoomList({ gameRooms, joinRoom, deleteRoom, user }) 
               {user?.id === gameAdmin && (
                 <MdDeleteOutline className="btn-delete" onClick={() => deleteRoom(_id)} size={32} />
               )}
-              <button onClick={() => joinRoom(_id)} className="btn" disabled={gameStarted}>
-                {gameStarted ? "Started" : "Join"}
+              <button onClick={() => joinRoom(_id)} className="btn">
+                Join
               </button>
+              {/* <button onClick={() => joinRoom(_id)} className="btn" disabled={gameStarted}>
+                {gameStarted ? "Started" : "Join"}
+              </button> */}
             </span>
           </li>
         ))
