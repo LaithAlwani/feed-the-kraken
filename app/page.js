@@ -25,6 +25,7 @@ export default function Home() {
             </Link>
           </SignedIn>
         </div>
+          <span className="trade-mark">Made By Laith Alwani</span>
       </div>
     </>
   );
