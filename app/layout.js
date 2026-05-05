@@ -3,13 +3,13 @@ import styles from "./page.module.css";
 import { Toaster } from "react-hot-toast";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
+import ConvexClientProvider from "@/components/ConvexClientProvider";
 
 export const metadata = {
   title: "Feed the Kraken App",
   description: "A Companion app for Feed the Kraken boardgame",
   generator: "Next.js",
-  manifest: "/manifest.json",
-  keywords: ["nextjs", "next14", "pwa", "next-pwa", "boardgames", "feed the kraken"],
+  keywords: ["nextjs", "boardgames", "feed the kraken", "companion app"],
   authors: [
     {
       name: "Laith Alwani",
@@ -22,20 +22,18 @@ export const metadata = {
   ],
 };
 
-// export const metadata = {
-
-// };
-
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body>
-          <Toaster />
-          <Navbar />
-          <main className={styles.main}>{children}</main>
-        </body>
-      </html>
+      <ConvexClientProvider>
+        <html lang="en">
+          <body>
+            <Toaster />
+            <Navbar />
+            <main className={styles.main}>{children}</main>
+          </body>
+        </html>
+      </ConvexClientProvider>
     </ClerkProvider>
   );
 }

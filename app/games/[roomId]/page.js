@@ -1,246 +1,283 @@
 "use client";
-import { useState, useEffect } from "react";
-import { pusherClient } from "@/lib/pusher";
-import toast from "react-hot-toast";
-import { useUser } from "@clerk/nextjs";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation, useQuery } from "convex/react";
+import toast from "react-hot-toast";
 import { MdOutlineExitToApp } from "react-icons/md";
 import PlayersList from "@/components/PlayersList";
-import ChooseEvent from "@/components/ChooseEvent";
-import ChooseRole from "@/components/ChooseRole";
-import Recruit from "@/components/Recruit";
-import GiveGuns from "@/components/GiveGuns";
+import RoleReveal from "@/components/RoleReveal";
+import NavigationTeamPanel from "@/components/NavigationTeamPanel";
+import PendingRevealModal from "@/components/PendingRevealModal";
+import CaptainActions from "@/components/CaptainActions";
+import CultLeaderActions from "@/components/CultLeaderActions";
+import ConfirmModal from "@/components/ConfirmModal";
+import { api } from "@/convex/_generated/api";
 
 export default function GamePage({ params }) {
+  const { roomId } = use(params);
   const router = useRouter();
-  const [toggleEventMenu, setToggleEventMenu] = useState(false);
-  const [toggleEventModle, setToggleEventModle] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState("");
-  const [gameRoom, setGameRoom] = useState({});
-  const [currentPlayer, setCurrentPlayer] = useState(null);
-  const { isLoaded, user } = useUser();
-  const { roomId } = params;
+  const view = useQuery(api.games.getMyGameView, { roomId });
+  const startGame = useMutation(api.games.startGame);
+  const restartGame = useMutation(api.games.restartGame);
+  const leaveRoom = useMutation(api.players.leaveRoom);
+  const addFakePlayer = useMutation(api.players.addFakePlayer);
+  const removeFakePlayers = useMutation(api.players.removeFakePlayers);
 
-  const updateRoom = async () => {
-    const res = await fetch(`/api/game/${roomId}`);
-    if (res.ok) {
-      const data = await res.json();
-      setGameRoom(data[0]);
-      setCurrentPlayer(data[0]?.players.find((player) => player.id === user?.id));
-    }
-    
-    
-  };
+  const [showDebugRoles, setShowDebugRoles] = useState(false);
+  const debugRoles = useQuery(
+    api.games.getAllRolesDebug,
+    showDebugRoles ? { roomId } : "skip",
+  );
 
-  const leaveRoom = async () => {
-    const res = await fetch("/api/player/remove", {
-      method: "POST",
-      body: JSON.stringify({ user, roomId }),
-    });
-    if (res.ok) {
-      router.push("/games");
-    }
-  };
+  const [confirmingLeave, setConfirmingLeave] = useState(false);
+  const [confirmingRestart, setConfirmingRestart] = useState(false);
 
-  const startEvent = () => {
-    setToggleEventMenu(!toggleEventMenu);
-  };
-
-  const chooseEvent = async (eventValue) => {
-    setCurrentEvent(eventValue);
-    const res = await fetch("/api/game/event", {
-      method: "POST",
-      body: JSON.stringify({ roomId, eventValue }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-    }
-  };
-
-  const openEventModle = (eventValue) => {
-    setCurrentEvent(eventValue);
-    setToggleEventModle(true);
-  };
-
-  const choosePlayerToRecruit = async (playerId) => {
-    const cultLeader = gameRoom.players.filter((player) => player.id === user.id)[0];
-    await fetch("/api/game/event/recruit", {
-      method: "POST",
-      body: JSON.stringify({ roomId, playerId, cultLeader }),
-    });
-  };
-
-  const [totalGuns, setTotalGuns] = useState(0);
-  const gunTotal = (player, value) => {
-    if (totalGuns + value > 3) {
-      return toast.error("Only 3 guns can be distributed");
-    }
-
-    if (player.guns + value < 0) {
-      return toast.error("no negative values");
-    }
-    setTotalGuns((prev) => prev + value);
-    player.guns += value;
-    document.getElementById(player.id).innerHTML = player.guns;
-  };
-
-  const distributeGuns = async () => {
-    if (totalGuns != 3) return toast.error("you must give out 3 guns!");
-    const res = await fetch("/api/game/event/guns", {
-      method: "POST",
-      body: JSON.stringify({ roomId, players: gameRoom.players }),
-    });
-    if (res.ok) {
-      gameRoom.players.forEach((player) => (player.guns = 0));
-      setTotalGuns(0);
-    }
-  };
-
-  const customToast = (player, message, duration) => {
-    toast.custom(
-      <div className="custom-toast">
-        <img src={player.avatar} alt="" className="avatar" />
-        <p>
-          {player.username} {message}
-        </p>
-      </div>,
-      { duration: duration || 2000, id: player.id }
-    );
-  };
-
-  const chooseRole = async (value) => {
-    setCurrentPlayer({ ...currentPlayer, role: value });
-    await fetch("/api/player/update", {
-      method: "POST",
-      body: JSON.stringify({ roomId, currentPlayer, role: value }),
-    });
-  };
-
-  const startGame = async () => {
-    setGameRoom({ ...gameRoom, gameStarted: true });
-    await fetch("/api/game/start", {
-      method: "POST",
-      body: JSON.stringify({ roomId }),
-    });
-  };
-
+  // Intercept the browser/device back button. We push a sentinel history entry
+  // on mount; when the user hits back, popstate fires, we re-push the sentinel
+  // (so they stay on the page) and surface the confirm modal.
   useEffect(() => {
-    user && updateRoom();
-
-    pusherClient.subscribe(roomId);
-
-    pusherClient.bind("player-joined", (player) => {
-      updateRoom();
-      if (isLoaded) {
-        if (user.id === player.id) {
-          toast.success(`joined Room`, { id: player.id });
-        } else {
-          customToast(player, "has joined");
-        }
-      }
-    });
-    pusherClient.bind("player-left", (player) => {
-      updateRoom();
-      if (isLoaded) {
-        if (user?.id === player.id) {
-          customToast(player, "you left the Room");
-        } else {
-          customToast(player, "has left");
-        }
-      }
-    });
-
-    pusherClient.bind("room-deleted", (gameRoom) => {
-      toast.success("room has been delete", { id: gameRoom._id });
-      router.push("/games");
-    });
-
-    pusherClient.bind("incoming-event", (value) => {
-      openEventModle(value);
-    });
-
-    pusherClient.bind("recruit", (data) => {
-      const { cultLeader, playerId } = data;
-      const canVibrate = window.navigator.vibrate;
-      if (user?.id === playerId) {
-        customToast(cultLeader, "has recriuted you!", 7000);
-        if (canVibrate) navigator.vibrate([150, 25, 150, 25, 150]);
-      } else {
-        if (canVibrate) navigator.vibrate(500);
-      }
-      setToggleEventModle(false);
-      setToggleEventMenu(false);
-    });
-    pusherClient.bind("guns", (players) => {
-      players.forEach((player) => {
-        if (user?.id === player.id) {
-          customToast(player, `you have been awarded ${player.guns} gun(s)`, 7000);
-        } else {
-          customToast(player, `has been awarded ${player.guns} gun(s)`, 7000);
-        }
-      });
-      const canVibrate = window.navigator.vibrate;
-      if (canVibrate) navigator.vibrate(500);
-      setToggleEventModle(false);
-      setToggleEventMenu(false);
-    });
-    pusherClient.bind("game-started", (gameRoom) => {
-      updateRoom();
-      toast.success(`${gameRoom.name} has started!`, { id: gameRoom._id });
-    });
-
-    return () => {
-      pusherClient.unsubscribe(roomId);
+    if (typeof window === "undefined") return;
+    window.history.pushState(null, "");
+    const onPop = () => {
+      window.history.pushState(null, "");
+      setConfirmingLeave(true);
     };
-  }, [user]);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // Native browser warning on tab close / refresh once the game is in flight.
+  // (Can't customize the message in modern browsers — they show their own.)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!view?.room?.gameStarted) return;
+    const beforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+    return () => window.removeEventListener("beforeunload", beforeUnload);
+  }, [view?.room?.gameStarted]);
+
+  if (view === undefined) return <p>loading...</p>;
+  if (view === null) return <p>This room no longer exists.</p>;
+
+  const { room, players, me, fellowPirates } = view;
+  const myUserId = players.find((p) => p._id === me?._id)?.userId ?? null;
+  const amAdmin = myUserId === room.gameAdmin;
+  const amCaptain = !!myUserId && myUserId === room.currentCaptain;
+  const amCultLeader = me?.role === "cult-leader";
+
+  const MIN_PLAYERS = 5;
+  const MAX_PLAYERS = 11;
+  const playerCount = players.length;
+  const canStart = playerCount >= MIN_PLAYERS && playerCount <= MAX_PLAYERS;
+  const startLabel =
+    playerCount < MIN_PLAYERS
+      ? `Need ${MIN_PLAYERS - playerCount} more player${MIN_PLAYERS - playerCount === 1 ? "" : "s"} (${playerCount}/${MIN_PLAYERS})`
+      : playerCount > MAX_PLAYERS
+        ? `Too many players (${playerCount}/${MAX_PLAYERS})`
+        : `Start Game (${playerCount} players)`;
+
+  const onLeaveClick = () => setConfirmingLeave(true);
+
+  const confirmLeave = async () => {
+    setConfirmingLeave(false);
+    try {
+      await leaveRoom({ roomId });
+    } catch (err) {
+      toast.error(err.message ?? "Could not leave the room");
+    }
+    router.push("/games");
+  };
+
+  const onStart = async () => {
+    try {
+      await startGame({ roomId });
+    } catch (err) {
+      toast.error(err.message ?? "Could not start the game");
+    }
+  };
+
+  const onRestartClick = () => setConfirmingRestart(true);
+
+  const confirmRestart = async () => {
+    setConfirmingRestart(false);
+    try {
+      await restartGame({ roomId });
+      toast.success("Game restarted — new roles dealt.");
+    } catch (err) {
+      toast.error(err.message ?? "Could not restart the game");
+    }
+  };
+
+  const onAddFake = async () => {
+    try {
+      await addFakePlayer({ roomId });
+    } catch (err) {
+      toast.error(err.message ?? "Could not add a fake player");
+    }
+  };
+
+  const onClearFakes = async () => {
+    try {
+      await removeFakePlayers({ roomId });
+    } catch (err) {
+      toast.error(err.message ?? "Could not clear fake players");
+    }
+  };
+
+  const showRoleReveal = room.gameStarted && me && !me.hasSeenRole;
+  const showNavPanel =
+    room.gameStarted && me?.hasSeenRole && (amCaptain || amAdmin);
 
   return (
     <section>
-      <h2>{gameRoom.name}</h2>
-      {currentPlayer && !currentPlayer?.role && (
-        <div className="modle">
-          <ChooseRole chooseRole={chooseRole} />
-        </div>
+      <h2>{room.name}</h2>
+      <MdOutlineExitToApp
+        size={28}
+        className="btn-leave"
+        onClick={onLeaveClick}
+      />
+
+      {showRoleReveal && (
+        <RoleReveal roomId={roomId} role={me.role} fellowPirates={fellowPirates} />
       )}
 
-      <MdOutlineExitToApp size={28} className="btn-leave" onClick={leaveRoom} />
-      {toggleEventMenu && (
-        <div className="modle row">
-          <ChooseEvent chooseEvent={chooseEvent} />
-        </div>
+      {!showRoleReveal && me?.pendingReveal && (
+        <PendingRevealModal roomId={roomId} reveal={me.pendingReveal} />
       )}
-      {toggleEventModle && (
-        <div className="modle">
-          {currentEvent === "recruit" ? (
-            <Recruit
-              currentPlayer={currentPlayer}
-              players={gameRoom.players}
-              eventValue={currentEvent}
-              choosePlayerToRecruit={choosePlayerToRecruit}
-            />
+
+      {amAdmin && (
+        <div className="test-panel">
+          <span className="test-panel-label">Test helpers</span>
+          {!room.gameStarted ? (
+            <>
+              <button
+                type="button"
+                className="btn"
+                onClick={onAddFake}
+                disabled={playerCount >= MAX_PLAYERS}
+              >
+                + Fake player
+              </button>
+              <button type="button" className="btn" onClick={onClearFakes}>
+                Clear fakes
+              </button>
+            </>
           ) : (
-            <GiveGuns
-              eventValue={currentEvent}
-              currentPlayer={currentPlayer}
-              players={gameRoom.players}
-              distributeGuns={distributeGuns}
-              gunTotal={gunTotal}
-              totalGuns={totalGuns}
-            />
+            <>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setShowDebugRoles((v) => !v)}
+              >
+                {showDebugRoles ? "Hide all roles" : "Show all roles (debug)"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={onRestartClick}
+              >
+                Restart Game
+              </button>
+            </>
           )}
         </div>
       )}
-      {currentPlayer && user?.id === gameRoom.gameAdmin && !toggleEventModle &&
-        (gameRoom.gameStarted ? (
-          <button onClick={startEvent} className="btn btn-event">
-            Start Event
-          </button>
-        ) : (
-          <button className="btn btn-event" onClick={startGame}>
-            Start Game
-          </button>
-        ))}
-      <PlayersList players={gameRoom.players} currentPlayer={currentPlayer} />
+
+      {showDebugRoles && debugRoles !== undefined && debugRoles !== null && (
+        <ul className="debug-roles">
+          {debugRoles.map((p) => (
+            <li key={p.userId} className={`role-${p.role ?? "none"}`}>
+              <span className="player-name">{p.username}</span>
+              <span className="player-badges">{p.role ?? "—"}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {!room.gameStarted && amAdmin && (
+        <button
+          className="btn btn-event"
+          onClick={onStart}
+          disabled={!canStart}
+        >
+          {startLabel}
+        </button>
+      )}
+
+      <PlayersList
+        players={players}
+        myUserId={myUserId}
+        myRole={me?.role ?? null}
+        fellowPirates={fellowPirates}
+        captainId={room.currentCaptain}
+        lieutenantId={room.currentLieutenant}
+        navigatorId={room.currentNavigator}
+      />
+
+      {showNavPanel && (
+        <NavigationTeamPanel
+          roomId={roomId}
+          players={players}
+          captainId={room.currentCaptain}
+          lieutenantId={room.currentLieutenant}
+          navigatorId={room.currentNavigator}
+        />
+      )}
+
+      {room.gameStarted && me?.hasSeenRole && amCaptain && (
+        <CaptainActions roomId={roomId} players={players} myUserId={myUserId} />
+      )}
+
+      {room.gameStarted && me?.hasSeenRole && amCultLeader && (
+        <CultLeaderActions
+          roomId={roomId}
+          players={players}
+          myUserId={myUserId}
+          room={room}
+        />
+      )}
+
+      {confirmingLeave && (
+        <ConfirmModal
+          title="Leave the room?"
+          body={
+            room.gameStarted ? (
+              <p>
+                <strong>You can't rejoin</strong> once the game has started.
+                Your seat is gone for the rest of this voyage.
+              </p>
+            ) : (
+              <p>The game hasn't started — you can rejoin from the lobby.</p>
+            )
+          }
+          confirmLabel="Leave anyway"
+          cancelLabel="Stay"
+          danger
+          onCancel={() => setConfirmingLeave(false)}
+          onConfirm={confirmLeave}
+        />
+      )}
+
+      {confirmingRestart && (
+        <ConfirmModal
+          title="Restart the game?"
+          body={
+            <p>
+              Roles, navigation team, gun counts, and search marks will all be
+              wiped. Players keep their seats and new roles are dealt
+              immediately.
+            </p>
+          }
+          confirmLabel="Restart and redeal"
+          cancelLabel="Keep playing"
+          danger
+          onCancel={() => setConfirmingRestart(false)}
+          onConfirm={confirmRestart}
+        />
+      )}
     </section>
   );
 }
