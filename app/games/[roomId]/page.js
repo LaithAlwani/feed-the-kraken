@@ -8,10 +8,14 @@ import PlayersList from "@/components/PlayersList";
 import RoleReveal from "@/components/RoleReveal";
 import NavigationTeamPanel from "@/components/NavigationTeamPanel";
 import PendingRevealModal from "@/components/PendingRevealModal";
-import CaptainActions from "@/components/CaptainActions";
+import CaptainActionsDrawer from "@/components/CaptainActions";
 import CultLeaderActions from "@/components/CultLeaderActions";
+import AdminDrawer from "@/components/AdminDrawer";
 import ConfirmModal from "@/components/ConfirmModal";
 import { api } from "@/convex/_generated/api";
+
+const MIN_PLAYERS = 5;
+const MAX_PLAYERS = 11;
 
 export default function GamePage({ params }) {
   const { roomId } = use(params);
@@ -20,21 +24,12 @@ export default function GamePage({ params }) {
   const startGame = useMutation(api.games.startGame);
   const restartGame = useMutation(api.games.restartGame);
   const leaveRoom = useMutation(api.players.leaveRoom);
-  const addFakePlayer = useMutation(api.players.addFakePlayer);
-  const removeFakePlayers = useMutation(api.players.removeFakePlayers);
-
-  const [showDebugRoles, setShowDebugRoles] = useState(false);
-  const debugRoles = useQuery(
-    api.games.getAllRolesDebug,
-    showDebugRoles ? { roomId } : "skip",
-  );
 
   const [confirmingLeave, setConfirmingLeave] = useState(false);
   const [confirmingRestart, setConfirmingRestart] = useState(false);
+  const [captainDrawerOpen, setCaptainDrawerOpen] = useState(false);
 
-  // Intercept the browser/device back button. We push a sentinel history entry
-  // on mount; when the user hits back, popstate fires, we re-push the sentinel
-  // (so they stay on the page) and surface the confirm modal.
+  // Browser/device back button → confirm modal instead of leaving silently.
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.history.pushState(null, "");
@@ -46,8 +41,7 @@ export default function GamePage({ params }) {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // Native browser warning on tab close / refresh once the game is in flight.
-  // (Can't customize the message in modern browsers — they show their own.)
+  // Tab close / refresh once the game is live → native browser warning.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!view?.room?.gameStarted) return;
@@ -59,25 +53,29 @@ export default function GamePage({ params }) {
     return () => window.removeEventListener("beforeunload", beforeUnload);
   }, [view?.room?.gameStarted]);
 
-  if (view === undefined) return <p>loading...</p>;
-  if (view === null) return <p>This room no longer exists.</p>;
+  if (view === undefined)
+    return <p className="p-8 text-center text-fg-dim">loading...</p>;
+  if (view === null)
+    return (
+      <p className="p-8 text-center text-fg-dim">
+        This room no longer exists.
+      </p>
+    );
 
   const { room, players, me, fellowPirates } = view;
   const myUserId = players.find((p) => p._id === me?._id)?.userId ?? null;
   const amAdmin = myUserId === room.gameAdmin;
   const amCaptain = !!myUserId && myUserId === room.currentCaptain;
   const amCultLeader = me?.role === "cult-leader";
-
-  const MIN_PLAYERS = 5;
-  const MAX_PLAYERS = 11;
   const playerCount = players.length;
   const canStart = playerCount >= MIN_PLAYERS && playerCount <= MAX_PLAYERS;
+
   const startLabel =
     playerCount < MIN_PLAYERS
       ? `Need ${MIN_PLAYERS - playerCount} more player${MIN_PLAYERS - playerCount === 1 ? "" : "s"} (${playerCount}/${MIN_PLAYERS})`
       : playerCount > MAX_PLAYERS
         ? `Too many players (${playerCount}/${MAX_PLAYERS})`
-        : `Start Game (${playerCount} players)`;
+        : `Start Game`;
 
   const onLeaveClick = () => setConfirmingLeave(true);
 
@@ -99,114 +97,75 @@ export default function GamePage({ params }) {
     }
   };
 
-  const onRestartClick = () => setConfirmingRestart(true);
-
   const confirmRestart = async () => {
     setConfirmingRestart(false);
     try {
       await restartGame({ roomId });
-      toast.success("Game restarted — new roles dealt.");
+      toast.success("Returned to lobby.");
     } catch (err) {
       toast.error(err.message ?? "Could not restart the game");
     }
   };
 
-  const onAddFake = async () => {
-    try {
-      await addFakePlayer({ roomId });
-    } catch (err) {
-      toast.error(err.message ?? "Could not add a fake player");
-    }
-  };
-
-  const onClearFakes = async () => {
-    try {
-      await removeFakePlayers({ roomId });
-    } catch (err) {
-      toast.error(err.message ?? "Could not clear fake players");
-    }
-  };
-
   const showRoleReveal = room.gameStarted && me && !me.hasSeenRole;
-  const showNavPanel =
-    room.gameStarted && me?.hasSeenRole && (amCaptain || amAdmin);
+  const showNavTab = room.gameStarted && me?.hasSeenRole;
+  const showCultTab = room.gameStarted && me?.hasSeenRole && amCultLeader;
+  const hasAnyTab = showNavTab || showCultTab;
+  const meCanSearch = room.gameStarted && me?.hasSeenRole && amCaptain;
 
   return (
-    <section>
-      <h2>{room.name}</h2>
-      <MdOutlineExitToApp
-        size={28}
-        className="btn-leave"
-        onClick={onLeaveClick}
-      />
-
-      {showRoleReveal && (
-        <RoleReveal roomId={roomId} role={me.role} fellowPirates={fellowPirates} />
-      )}
-
-      {!showRoleReveal && me?.pendingReveal && (
-        <PendingRevealModal roomId={roomId} reveal={me.pendingReveal} />
-      )}
-
-      {amAdmin && (
-        <div className="test-panel">
-          <span className="test-panel-label">Test helpers</span>
-          {!room.gameStarted ? (
-            <>
-              <button
-                type="button"
-                className="btn"
-                onClick={onAddFake}
-                disabled={playerCount >= MAX_PLAYERS}
-              >
-                + Fake player
-              </button>
-              <button type="button" className="btn" onClick={onClearFakes}>
-                Clear fakes
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                className="btn"
-                onClick={() => setShowDebugRoles((v) => !v)}
-              >
-                {showDebugRoles ? "Hide all roles" : "Show all roles (debug)"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={onRestartClick}
-              >
-                Restart Game
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      {showDebugRoles && debugRoles !== undefined && debugRoles !== null && (
-        <ul className="debug-roles">
-          {debugRoles.map((p) => (
-            <li key={p.userId} className={`role-${p.role ?? "none"}`}>
-              <span className="player-name">{p.username}</span>
-              <span className="player-badges">{p.role ?? "—"}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {!room.gameStarted && amAdmin && (
+    <section
+      className="w-full px-4 py-6 flex flex-col gap-4 items-stretch animate-fade-up"
+      style={{
+        minHeight: "calc(100svh - 5rem - env(safe-area-inset-top, 0px))",
+      }}
+    >
+      {/* Top bar */}
+      <header
+        className="flex items-center gap-2 w-full max-w-md mx-auto rounded-lg border border-border bg-bg-card px-3 py-2.5"
+        style={{ boxShadow: "var(--shadow-card)" }}
+      >
         <button
-          className="btn btn-event"
-          onClick={onStart}
-          disabled={!canStart}
+          type="button"
+          onClick={onLeaveClick}
+          aria-label="Leave room"
+          className="bg-transparent border-0 text-danger cursor-pointer p-2 rounded-md transition-colors duration-150 hover:text-danger-strong hover:bg-danger/8 flex items-center justify-center"
         >
-          {startLabel}
+          <MdOutlineExitToApp size={22} style={{ transform: "scaleX(-1)" }} />
         </button>
-      )}
+        <h2 className="flex-1 m-0 text-center text-lg tracking-[0.094rem] truncate">
+          {room.name}
+        </h2>
+        {amAdmin ? (
+          <AdminDrawer
+            roomId={roomId}
+            gameStarted={room.gameStarted}
+            playerCount={playerCount}
+            maxPlayers={MAX_PLAYERS}
+            onRequestRestart={() => setConfirmingRestart(true)}
+          />
+        ) : (
+          <span className="w-9" aria-hidden />
+        )}
+      </header>
 
+      {/* Status pill */}
+      <div className="flex justify-center">
+        <span
+          className={[
+            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs uppercase tracking-[0.094rem]",
+            room.gameStarted
+              ? "live-dot text-success border-success/40"
+              : "text-fg-dim border-border bg-bg-card",
+          ].join(" ")}
+        >
+          {room.gameStarted
+            ? "In progress"
+            : `Lobby · ${playerCount}/${MAX_PLAYERS}`}
+        </span>
+      </div>
+
+      {/* Players list */}
       <PlayersList
         players={players}
         myUserId={myUserId}
@@ -215,28 +174,70 @@ export default function GamePage({ params }) {
         captainId={room.currentCaptain}
         lieutenantId={room.currentLieutenant}
         navigatorId={room.currentNavigator}
+        onMeClick={meCanSearch ? () => setCaptainDrawerOpen(true) : undefined}
+        meActionHint={meCanSearch ? "tap to search" : undefined}
       />
 
-      {showNavPanel && (
-        <NavigationTeamPanel
+      {/* Inline action triggers (post-role-reveal; only roles that apply to me) */}
+      {hasAnyTab && (
+        <div
+          className="fixed bottom-8 right-8 flex gap-3"
+          aria-label="Game actions"
+        >
+          {showNavTab && (
+            <NavigationTeamPanel
+              roomId={roomId}
+              players={players}
+              captainId={room.currentCaptain}
+              lieutenantId={room.currentLieutenant}
+              navigatorId={room.currentNavigator}
+            />
+          )}
+          {showCultTab && (
+            <CultLeaderActions
+              roomId={roomId}
+              players={players}
+              myUserId={myUserId}
+              room={room}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Pre-game CTA */}
+      {!room.gameStarted && amAdmin && (
+        <button
+          className="btn btn-alt fixed left-4 right-4 z-20 min-h-13 animate-slide-in-bottom"
+          style={{
+            bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+          }}
+          onClick={onStart}
+          disabled={!canStart}
+        >
+          {startLabel}
+        </button>
+      )}
+
+      {/* Modals */}
+      {showRoleReveal && (
+        <RoleReveal
           roomId={roomId}
-          players={players}
-          captainId={room.currentCaptain}
-          lieutenantId={room.currentLieutenant}
-          navigatorId={room.currentNavigator}
+          role={me.role}
+          fellowPirates={fellowPirates}
         />
       )}
 
-      {room.gameStarted && me?.hasSeenRole && amCaptain && (
-        <CaptainActions roomId={roomId} players={players} myUserId={myUserId} />
+      {!showRoleReveal && me?.pendingReveal && (
+        <PendingRevealModal roomId={roomId} reveal={me.pendingReveal} />
       )}
 
-      {room.gameStarted && me?.hasSeenRole && amCultLeader && (
-        <CultLeaderActions
+      {captainDrawerOpen && (
+        <CaptainActionsDrawer
           roomId={roomId}
           players={players}
           myUserId={myUserId}
-          room={room}
+          onClose={() => setCaptainDrawerOpen(false)}
         />
       )}
 
@@ -266,12 +267,13 @@ export default function GamePage({ params }) {
           title="Restart the game?"
           body={
             <p>
-              Roles, navigation team, gun counts, and search marks will all be
-              wiped. Players keep their seats and new roles are dealt
-              immediately.
+              The room returns to the lobby. Roles, navigation team, gun
+              counts, and search marks are wiped. Players keep their seats —
+              you can add or remove players before pressing{" "}
+              <strong>Start Game</strong> again.
             </p>
           }
-          confirmLabel="Restart and redeal"
+          confirmLabel="Return to lobby"
           cancelLabel="Keep playing"
           danger
           onCancel={() => setConfirmingRestart(false)}

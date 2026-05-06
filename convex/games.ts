@@ -9,21 +9,24 @@ function displayName(identity: { name?: string | null; nickname?: string | null;
 export const listRooms = query({
   args: {},
   handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject ?? null;
     const rooms = await ctx.db.query("gameRooms").order("desc").collect();
     return Promise.all(
       rooms.map(async (room) => {
-        const playerCount = (
-          await ctx.db
-            .query("players")
-            .withIndex("by_room", (q) => q.eq("roomId", room._id))
-            .collect()
-        ).length;
+        const players = await ctx.db
+          .query("players")
+          .withIndex("by_room", (q) => q.eq("roomId", room._id))
+          .collect();
         return {
           _id: room._id,
           name: room.name,
           gameAdmin: room.gameAdmin,
           gameStarted: room.gameStarted,
-          playerCount,
+          playerCount: players.length,
+          // Lets the lobby skip the password prompt for already-seated users
+          // (e.g. tab refresh, or rejoining the same room from history).
+          iAmMember: userId ? players.some((p) => p.userId === userId) : false,
         };
       }),
     );
@@ -35,9 +38,11 @@ export const createRoom = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
+    if (!args.name.trim()) throw new Error("Room name is required");
+    if (!args.password.trim()) throw new Error("Password is required");
 
     const roomId = await ctx.db.insert("gameRooms", {
-      name: args.name,
+      name: args.name.trim(),
       password: args.password,
       gameAdmin: identity.subject,
       gameStarted: false,
@@ -123,9 +128,9 @@ export const startGame = mutation({
   },
 });
 
-// Admin-only: wipe all per-player game state and re-deal roles. Players
-// stay seated but their roles, examined status, guns, and pending reveals
-// are reset; navigation team is cleared; a fresh captain is picked.
+// Admin-only: wipe all per-player game state and return the room to the
+// lobby. Players stay seated; the admin can then add/remove players (or
+// fake players) before pressing Start Game again to deal fresh roles.
 export const restartGame = mutation({
   args: { roomId: v.id("gameRooms") },
   handler: async (ctx, { roomId }) => {
@@ -141,32 +146,24 @@ export const restartGame = mutation({
       .query("players")
       .withIndex("by_room", (q) => q.eq("roomId", roomId))
       .collect();
-    if (players.length < 5 || players.length > 11) {
-      throw new Error(
-        `Need 5–11 players to restart (currently ${players.length}).`,
-      );
-    }
 
-    const roles = assignRoles(players.length);
-    for (let i = 0; i < players.length; i++) {
-      await ctx.db.patch(players[i]._id, {
-        role: roles[i],
-        originalRole: roles[i],
-        guns: 3,
+    for (const p of players) {
+      await ctx.db.patch(p._id, {
+        role: undefined,
+        originalRole: undefined,
+        guns: undefined,
         hasBeenExamined: false,
         hasSeenRole: false,
         pendingReveal: undefined,
       });
     }
 
-    const captain = players[Math.floor(Math.random() * players.length)];
-    const cultLeader = players[roles.indexOf("cult-leader")];
     await ctx.db.patch(roomId, {
-      gameStarted: true,
-      currentCaptain: captain.userId,
+      gameStarted: false,
+      currentCaptain: undefined,
       currentLieutenant: undefined,
       currentNavigator: undefined,
-      cultNetworkUserIds: cultLeader ? [cultLeader.userId] : [],
+      cultNetworkUserIds: undefined,
     });
   },
 });
@@ -174,7 +171,7 @@ export const restartGame = mutation({
 export const setNavigationTeam = mutation({
   args: {
     roomId: v.id("gameRooms"),
-    captain: v.string(),
+    captain: v.optional(v.string()),
     lieutenant: v.optional(v.string()),
     navigator: v.optional(v.string()),
   },
@@ -184,16 +181,21 @@ export const setNavigationTeam = mutation({
     const room = await ctx.db.get(roomId);
     if (!room) throw new Error("Room not found");
 
-    const isCaptain = room.currentCaptain === identity.subject;
-    const isAdmin = room.gameAdmin === identity.subject;
-    if (!isCaptain && !isAdmin) {
-      throw new Error("Only the current captain or room admin can set the navigation team");
-    }
+    // Trust model: anyone seated in the room can mirror the table's badges.
+    // The physical captain/lieutenant/navigator badges are the real source of
+    // truth; this just keeps the app's view in sync.
+    const myPlayer = await ctx.db
+      .query("players")
+      .withIndex("by_room_and_user", (q) =>
+        q.eq("roomId", roomId).eq("userId", identity.subject),
+      )
+      .unique();
+    if (!myPlayer) throw new Error("You are not seated in this room");
 
-    if (lieutenant && captain === lieutenant) {
+    if (lieutenant && captain && captain === lieutenant) {
       throw new Error("Captain and Lieutenant must be different players");
     }
-    if (navigator && (captain === navigator || lieutenant === navigator)) {
+    if (navigator && ((captain && captain === navigator) || lieutenant === navigator)) {
       throw new Error("Navigator must be a different player from Captain and Lieutenant");
     }
 

@@ -6,8 +6,8 @@ function displayName(identity: { name?: string | null; nickname?: string | null;
 }
 
 export const joinRoom = mutation({
-  args: { roomId: v.id("gameRooms") },
-  handler: async (ctx, { roomId }) => {
+  args: { roomId: v.id("gameRooms"), password: v.string() },
+  handler: async (ctx, { roomId, password }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
@@ -15,6 +15,8 @@ export const joinRoom = mutation({
     if (!room) throw new Error("Room not found");
     if (room.gameStarted) throw new Error("This game has already started");
 
+    // Already a player in this room? Idempotent — skip the password check
+    // so refreshing or coming back from another page doesn't re-prompt.
     const existing = await ctx.db
       .query("players")
       .withIndex("by_room_and_user", (q) =>
@@ -22,6 +24,10 @@ export const joinRoom = mutation({
       )
       .unique();
     if (existing) return existing._id;
+
+    if (room.password !== password) {
+      throw new Error("Wrong password");
+    }
 
     const players = await ctx.db
       .query("players")

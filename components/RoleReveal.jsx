@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -26,95 +26,93 @@ const ROLE_INFO = {
   },
 };
 
-const PIRATE_TIMER_SECONDS = 5;
+const TIMER_SECONDS = 5;
+
+const COVER =
+  "fixed inset-0 z-30 flex flex-col items-center justify-center gap-5 p-6 text-fg text-center overflow-y-auto animate-fade-in bg-bg-modal [background:radial-gradient(ellipse_at_50%_30%,rgba(195,165,95,0.06),transparent_60%),var(--color-bg-modal)]";
 
 export default function RoleReveal({ roomId, role, fellowPirates }) {
-  const [step, setStep] = useState("gate");
-  const [secondsLeft, setSecondsLeft] = useState(PIRATE_TIMER_SECONDS);
+  const [secondsLeft, setSecondsLeft] = useState(TIMER_SECONDS);
   const markRoleSeen = useMutation(api.players.markRoleSeen);
+  const ackedRef = useRef(false);
 
   const info = role ? ROLE_INFO[role] : null;
+  const hasCrew =
+    role === "pirate" && fellowPirates && fellowPirates.length > 0;
 
+  // Tick the countdown once we have a role to show.
   useEffect(() => {
-    if (step !== "crew") return;
-    if (secondsLeft <= 0) {
-      setStep("ready");
-      return;
-    }
+    if (!info) return;
+    if (secondsLeft <= 0) return;
     const id = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
     return () => clearTimeout(id);
-  }, [step, secondsLeft]);
+  }, [info, secondsLeft]);
 
-  const acknowledge = async () => {
-    await markRoleSeen({ roomId });
-  };
+  // When the countdown finishes, auto-dismiss back to the game screen.
+  // `ackedRef` guards against StrictMode firing the effect twice.
+  useEffect(() => {
+    if (!info) return;
+    if (secondsLeft > 0) return;
+    if (ackedRef.current) return;
+    ackedRef.current = true;
+    markRoleSeen({ roomId });
+  }, [info, secondsLeft, markRoleSeen, roomId]);
 
   if (!info) {
     return (
-      <div className="role-reveal cover">
-        <p>Waiting for role assignment…</p>
-      </div>
-    );
-  }
-
-  if (step === "gate") {
-    return (
-      <div className="role-reveal cover">
-        <h2>Your role is ready</h2>
-        <p>Make sure no one is looking at your screen.</p>
-        <button className="btn btn-alt" onClick={() => setStep("role")}>
-          Tap to reveal
-        </button>
-      </div>
-    );
-  }
-
-  if (step === "role") {
-    const hasCrew = role === "pirate" && fellowPirates && fellowPirates.length > 0;
-    return (
-      <div className="role-reveal">
-        <div className={`role-card role-${role}`}>
-          <span className="role-icon" aria-hidden>{info.icon}</span>
-          <h3 className="role-name">{info.title}</h3>
-          <p className="role-tagline">{info.tagline}</p>
-        </div>
-        {hasCrew ? (
-          <button className="btn btn-alt" onClick={() => setStep("crew")}>
-            Meet your crew
-          </button>
-        ) : (
-          <button className="btn btn-alt" onClick={acknowledge}>
-            I'm ready
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  if (step === "crew") {
-    return (
-      <div className="role-reveal">
-        <h2>Your fellow pirates</h2>
-        <ul className="crew-list">
-          {fellowPirates.map((p) => (
-            <li key={p.userId}>
-              {p.avatar && <img src={p.avatar} alt="" className="avatar" />}
-              <span>{p.username}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="timer">Memorize them · {secondsLeft}s</p>
+      <div className={COVER}>
+        <p className="m-0 text-fg-dim">Waiting for role assignment…</p>
       </div>
     );
   }
 
   return (
-    <div className="role-reveal cover">
-      <h2>Got it.</h2>
-      <p>The journey begins.</p>
-      <button className="btn btn-alt" onClick={acknowledge}>
-        Continue
-      </button>
+    <div className={COVER}>
+      <div
+        className={`role-card-stripe role-${role} relative overflow-hidden flex w-full max-w-sm flex-col items-center gap-4 rounded-xl border border-border bg-bg-card p-7 animate-scale-in`}
+        style={{ boxShadow: "var(--shadow-modal)" }}
+      >
+        <span
+          className="text-7xl leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]"
+          aria-hidden
+        >
+          {info.icon}
+        </span>
+        <h3 className="m-0 text-2xl uppercase tracking-[0.187rem] text-fg">
+          {info.title}
+        </h3>
+        <p className="m-0 text-fg-dim text-base">{info.tagline}</p>
+      </div>
+
+      {hasCrew && (
+        <div className="w-full max-w-sm flex flex-col gap-2">
+          <p className="m-0 text-xs uppercase tracking-[0.125rem] text-fg-dim">
+            Your crew
+          </p>
+          <ul className="flex flex-col gap-2 m-0 p-0">
+            {fellowPirates.map((p, i) => (
+              <li
+                key={p.userId}
+                className="flex items-center gap-3 rounded-lg border border-border border-l-[3px] border-l-role-pirate bg-bg-card px-4 py-2 animate-fade-up"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                {p.avatar && (
+                  <img
+                    src={p.avatar}
+                    alt=""
+                    className="w-8 h-8 rounded-full border border-border"
+                  />
+                )}
+                <span>{p.username}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <p className="m-0 text-fg-dim tabular-nums tracking-[0.125rem]">
+        Memorize · {Math.max(secondsLeft, 0)}s
+      </p>
     </div>
   );
 }
